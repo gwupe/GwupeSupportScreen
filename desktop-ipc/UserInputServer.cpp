@@ -45,6 +45,7 @@ UserInputServer::UserInputServer(BlockingGate *forwGate,
   dispatcher->registerNewHandle(WINDOW_COORDS_REQ, this);
   dispatcher->registerNewHandle(WINDOW_HANDLE_REQ, this);
   dispatcher->registerNewHandle(DISPLAY_NUMBER_COORDS_REQ, this);
+  dispatcher->registerNewHandle(APPLICATION_REGION_REQ, this);
   dispatcher->registerNewHandle(NORMALIZE_RECT_REQ, this);
   dispatcher->registerNewHandle(USER_INPUT_INIT, this);
 }
@@ -98,6 +99,9 @@ void UserInputServer::onRequest(UINT8 reqCode, BlockingGate *backGate)
     break;
   case DISPLAY_NUMBER_COORDS_REQ:
     ansDisplayNumberCoords(backGate);
+    break;
+  case APPLICATION_REGION_REQ:
+    ansApplicationRegion(backGate);
     break;
   case NORMALIZE_RECT_REQ:
     ansNormalizeRect(backGate);
@@ -192,4 +196,12 @@ void UserInputServer::ansNormalizeRect(BlockingGate *backGate)
   Rect rect = readRect(backGate);
   m_userInput->getNormalizedRect(&rect);
   sendRect(&rect, backGate);
+}
+
+void UserInputServer::ansApplicationRegion(BlockingGate *backGate)
+{
+  UINT32 procId = backGate->readUInt32();
+  Region region;
+  m_userInput->getApplicationRegion(procId, &region);
+  sendRegion(&region, backGate);
 }

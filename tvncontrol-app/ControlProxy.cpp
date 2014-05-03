@@ -179,6 +179,14 @@ void ControlProxy::shareFull()
   msg->send();
 }
 
+void ControlProxy::shareApp(unsigned int procId)
+{
+  AutoLock l(m_gate);
+  ControlMessage *msg = createMessage(ControlProto::SHARE_APP_MSG_ID);
+  msg->writeUInt32(procId);
+  msg->send();
+}
+
 void ControlProxy::setServerConfig(ServerConfig *config)
 {
   AutoLock l(m_gate);

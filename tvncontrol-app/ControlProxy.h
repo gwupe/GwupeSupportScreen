@@ -136,6 +136,9 @@ public:
   // Share full desktop for all clients.
   void shareFull();
 
+  // Share only application region for all clients. Other regions must be painted to black.
+  void shareApp(unsigned int procId);
+
   /**
    * Sends new configuration to server.
    * @param config new server configuration.

@@ -54,9 +54,6 @@
     <ClCompile Include="RfbSetPixelFormatClientMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StandardPixelFormatFactory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="VncAuthentication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -123,6 +120,9 @@
     <ClCompile Include="LastRectDecoder.cpp">
       <Filter>Decoders</Filter>
     </ClCompile>
+    <ClCompile Include="VncAuthenticationHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AuthHandler.h">
@@ -159,9 +159,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RfbSetPixelFormatClientMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StandardPixelFormatFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VncAuthentication.h">
@@ -229,6 +226,9 @@
     </ClInclude>
     <ClInclude Include="DecoderOfRectangle.h">
       <Filter>Decoders</Filter>
+    </ClInclude>
+    <ClInclude Include="VncAuthenticationHandler.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

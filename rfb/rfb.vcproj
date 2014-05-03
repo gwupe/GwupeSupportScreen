@@ -565,6 +565,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StandardPixelFormatFactory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\VendorDefs.cpp"
 				>
 			</File>
@@ -608,6 +612,10 @@
 			</File>
 			<File
 				RelativePath=".\RfbKeySymListener.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StandardPixelFormatFactory.h"
 				>
 			</File>
 			<File

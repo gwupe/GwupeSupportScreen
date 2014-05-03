@@ -193,6 +193,9 @@ public:
 
   // Send to server a command to share only the rect.
   static const UINT32 SHARE_FULL_MSG_ID = 0x24;
+
+  // Send to server a command to share only the rect.
+  static const UINT32 SHARE_APP_MSG_ID = 0x25;
 };
 
 #endif

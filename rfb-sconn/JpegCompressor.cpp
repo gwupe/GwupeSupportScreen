@@ -24,6 +24,9 @@
 
 #include "JpegCompressor.h"
 
+#include "util/AnsiStringStorage.h"
+#include "util/Exception.h"
+
 const int StandardJpegCompressor::ALLOC_CHUNK_SIZE = 65536;
 const int StandardJpegCompressor::DEFAULT_JPEG_QUALITY = 75;
 
@@ -75,9 +78,11 @@ StandardJpegCompressor::StandardJpegCompressor()
     m_numBytesReady(0)
 {
   // Initialize JPEG compression structure.
-  // FIXME: Do not use default error manager.
-  m_cinfo.err = jpeg_std_error(&m_jerr);
-  jpeg_create_compress(&m_cinfo);
+  jpeg_create_compress(&m_jpeg.cinfo);
+
+  m_jpeg.cinfo.err = jpeg_std_error(&m_jpeg.jerr);
+  m_jpeg.cinfo.err->error_exit = errorExit;
+  m_jpeg.cinfo.err->output_message = outputMessage;
 
   // Set up a destination manager.
   my_destination_mgr *dest = new my_destination_mgr;
@@ -85,16 +90,16 @@ StandardJpegCompressor::StandardJpegCompressor()
   dest->pub.empty_output_buffer = empty_output_buffer;
   dest->pub.term_destination = term_destination;
   dest->_this = this;
-  m_cinfo.dest = (jpeg_destination_mgr *)dest;
+  m_jpeg.cinfo.dest = (jpeg_destination_mgr *)dest;
 
   // Set up compression parameters. Do not set quality level here,
   // it will be set right before the compression.
-  m_cinfo.input_components = 3;
-  m_cinfo.in_color_space = JCS_RGB;
-  jpeg_set_defaults(&m_cinfo);
+  m_jpeg.cinfo.input_components = 3;
+  m_jpeg.cinfo.in_color_space = JCS_RGB;
+  jpeg_set_defaults(&m_jpeg.cinfo);
 
   // We prefer speed over quality.
-  m_cinfo.dct_method = JDCT_FASTEST;
+  m_jpeg.cinfo.dct_method = JDCT_FASTEST;
 }
 
 StandardJpegCompressor::~StandardJpegCompressor()
@@ -104,11 +109,36 @@ StandardJpegCompressor::~StandardJpegCompressor()
     free(m_outputBuffer);
 
   // Clean up the destination manager.
-  delete m_cinfo.dest;
-  m_cinfo.dest = NULL;
+  delete m_jpeg.cinfo.dest;
+  m_jpeg.cinfo.dest = NULL;
 
   // Release the JPEG compression structure.
-  jpeg_destroy_compress(&m_cinfo);
+  jpeg_destroy_compress(&m_jpeg.cinfo);
+}
+
+StringStorage StandardJpegCompressor::getMessage(j_common_ptr cinfo)
+{
+  char buffer[JMSG_LENGTH_MAX];
+  // Create the message
+  (*cinfo->err->format_message) (cinfo, buffer);
+
+  AnsiStringStorage errorAnsi(buffer);
+  StringStorage error;
+  errorAnsi.toStringStorage(&error);
+  return error;
+}
+
+void StandardJpegCompressor::errorExit(j_common_ptr cinfo)
+{
+  (*cinfo->err->output_message) (cinfo);
+  StringStorage error = getMessage(cinfo);
+  jpeg_destroy(cinfo);
+  throw Exception(error.getString());
+}
+
+void StandardJpegCompressor::outputMessage(j_common_ptr cinfo)
+{
+  return;
 }
 
 //
@@ -125,8 +155,8 @@ StandardJpegCompressor::initDestination()
   }
 
   m_numBytesReady = 0;
-  m_cinfo.dest->next_output_byte = m_outputBuffer;
-  m_cinfo.dest->free_in_buffer =  m_numBytesAllocated;
+  m_jpeg.cinfo.dest->next_output_byte = m_outputBuffer;
+  m_jpeg.cinfo.dest->free_in_buffer =  m_numBytesAllocated;
 }
 
 bool
@@ -138,8 +168,8 @@ StandardJpegCompressor::emptyOutputBuffer()
   m_outputBuffer = (unsigned char *)realloc(m_outputBuffer, newSize);
   m_numBytesAllocated = newSize;
 
-  m_cinfo.dest->next_output_byte = &m_outputBuffer[oldSize];
-  m_cinfo.dest->free_in_buffer = newSize - oldSize;
+  m_jpeg.cinfo.dest->next_output_byte = &m_outputBuffer[oldSize];
+  m_jpeg.cinfo.dest->free_in_buffer = newSize - oldSize;
 
   return true;
 }
@@ -147,7 +177,7 @@ StandardJpegCompressor::emptyOutputBuffer()
 void
 StandardJpegCompressor::termDestination()
 {
-  m_numBytesReady = m_numBytesAllocated - m_cinfo.dest->free_in_buffer;
+  m_numBytesReady = m_numBytesAllocated - m_jpeg.cinfo.dest->free_in_buffer;
 }
 
 //
@@ -175,7 +205,6 @@ StandardJpegCompressor::resetQuality()
   m_newQuality = DEFAULT_JPEG_QUALITY;
 }
 
-// FIXME: Add proper error handling.
 void
 StandardJpegCompressor::compress(const void *buf,
                                  const PixelFormat *fmt,
@@ -185,15 +214,15 @@ StandardJpegCompressor::compress(const void *buf,
     (fmt->bitsPerPixel == 32 && fmt->colorDepth == 24 &&
      fmt->redMax == 255 && fmt->greenMax == 255 && fmt->blueMax == 255);
 
-  m_cinfo.image_width = w;
-  m_cinfo.image_height = h;
+  m_jpeg.cinfo.image_width = w;
+  m_jpeg.cinfo.image_height = h;
 
   if (m_newQuality != m_quality) {
-    jpeg_set_quality(&m_cinfo, m_newQuality, true);
+    jpeg_set_quality(&m_jpeg.cinfo, m_newQuality, true);
     m_quality = m_newQuality;
   }
 
-  jpeg_start_compress(&m_cinfo, TRUE);
+  jpeg_start_compress(&m_jpeg.cinfo, TRUE);
 
   const char *src = (const char *)buf;
 
@@ -204,8 +233,8 @@ StandardJpegCompressor::compress(const void *buf,
     rowPointer[i] = &rgb[w * 3 * i];
 
   // Feed the pixels to the JPEG library.
-  while (m_cinfo.next_scanline < m_cinfo.image_height) {
-    int maxRows = m_cinfo.image_height - m_cinfo.next_scanline;
+  while (m_jpeg.cinfo.next_scanline < m_jpeg.cinfo.image_height) {
+    int maxRows = m_jpeg.cinfo.image_height - m_jpeg.cinfo.next_scanline;
     if (maxRows > 8) {
       maxRows = 8;
     }
@@ -217,12 +246,12 @@ StandardJpegCompressor::compress(const void *buf,
       }
       src += stride;
     }
-    jpeg_write_scanlines(&m_cinfo, rowPointer, maxRows);
+    jpeg_write_scanlines(&m_jpeg.cinfo, rowPointer, maxRows);
   }
 
   delete[] rgb;
 
-  jpeg_finish_compress(&m_cinfo);
+  jpeg_finish_compress(&m_jpeg.cinfo);
 }
 
 size_t StandardJpegCompressor::getOutputLength()

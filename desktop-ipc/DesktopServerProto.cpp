@@ -174,6 +174,7 @@ void DesktopServerProto::sendRegion(const Region *region, BlockingGate *gate)
 
 void DesktopServerProto::readRegion(Region *region, BlockingGate *gate)
 {
+  region->clear();
   unsigned int rectCount = gate->readUInt32();
   for (unsigned int i = 0; i < rectCount; i++) {
     Rect r = readRect(gate);

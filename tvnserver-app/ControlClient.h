@@ -191,6 +191,10 @@ private:
    * Calling when "share full id" message recieved.
    */
   void shareFullIdMsgRcvd();
+  /**
+   * Calling when "share app id" message recieved.
+   */
+  void shareAppIdMsgRcvd();
 
 private:
   /**
@@ -217,6 +221,8 @@ private:
    * true if control authentication is passed or no auth is set.
    */
   bool m_authPassed;
+  bool m_repeatAuthPassed;
+  UINT32 m_authReqMessageId;
 
   ControlAppAuthenticator *m_authenticator;
 
@@ -234,6 +240,7 @@ private:
    * Array of client messages that needs client to be auth.
    */
   static const UINT32 REQUIRES_AUTH[];
+  static const UINT32 WITHOUT_AUTH[];
 };
 
 #endif

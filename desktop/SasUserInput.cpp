@@ -114,3 +114,8 @@ HWND SasUserInput::getWindowHandleByName(const StringStorage *windowName)
 {
   return m_client->getWindowHandleByName(windowName);
 }
+
+void SasUserInput::getApplicationRegion(unsigned int procId, Region *region)
+{
+  m_client->getApplicationRegion(procId, region);
+}

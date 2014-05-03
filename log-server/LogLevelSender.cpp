@@ -54,10 +54,8 @@ void LogLevelSender::updateLevel(unsigned char newLevel)
 {
   AutoLock al(&m_updateMutex);
   m_updateAvailable = true;
-  // Rule for the client log level:
-  if (newLevel < 9) {
-    m_logLevel = 8;
-  } else {
+  m_logLevel = newLevel;
+  if (m_logLevel > 9) {
     m_logLevel = 9;
   }
   m_sleeper.notify();

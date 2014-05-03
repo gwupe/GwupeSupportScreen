@@ -118,6 +118,7 @@
         </File>
       </Component>
 
+      <?ifndef VIEWER_FREE ?>
       <Component Id='ViewerExe' Guid='{7E013E9C-D95F-4381-AEDB-FAD5B182AC1A}'>
         <File Id='viewerEXE' Name='tvnviewer.exe' DiskId='1' Source='$(var.BinFolder)\tvnviewer.exe' KeyPath='yes'>
           <Shortcut Id="startmenuViewer"
@@ -129,6 +130,7 @@
                     Advertise="yes" />
         </File>
       </Component>
+      <?endif?>
 
       <Component Id='LicenseFileComponent' Guid='{66D70E32-FE2B-49ca-A64C-3CCDC7A7BF95}'>
         <File Id='LicenseFile' Name='LICENSE.txt' Source='LICENSE.txt'
@@ -139,6 +141,7 @@
 
     <DirectoryRef Id="TARGETDIR" DiskId="1">
       <!--Viewer file associations -->
+      <?ifndef VIEWER_FREE ?>
       <Component Id='ViewerFileAssoc' Guid='{81F67CF9-F947-47e7-901A-B04DA8405323}'>
         <RegistryValue Id='vncAssoc1' Root='HKCR' Key='.vnc' Action='write' Type='string' Value='VncViewer.Config'/>
         <RegistryValue Id='vncAssoc2' Root='HKCR' Key='VncViewer.Config' Action='write' Type='string' Value='VNCviewer Config File' />
@@ -149,6 +152,7 @@
           VIEWER_ASSOCIATE_VNC_EXTENSION = 1 AND IS_SILENT = 1)
         </Condition>
       </Component>
+      <?endif?>
       <!-- Firewall exception -->
       <!-- Server firewall exception -->
       <Component Id="tvnserverFirewallException" Guid='{F4560702-BA2E-4498-A6F2-92FF9C109962}'>
@@ -160,6 +164,7 @@
         </Condition>
       </Component>
       <!-- Viewer firewall exception -->
+      <?ifndef VIEWER_FREE ?>
       <Component Id="TvnviewerFirewallException" Guid='{38F67337-C5C3-4616-9327-713B8A18C430}'>
         <fire:FirewallException Id="FWX2" Name="$(var.ProductName)" File="viewerEXE" Scope="any"
                                 IgnoreFailure="yes"/>
@@ -168,6 +173,7 @@
           VIEWER_ADD_FIREWALL_EXCEPTION = 1 AND IS_SILENT = 1)
         </Condition>
       </Component>
+      <?endif?>
     </DirectoryRef>
 
     <DirectoryRef Id="ProgramMenuDir" DiskId="1">

@@ -585,11 +585,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RreEncoder.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\TightEncoder.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\TightPalette.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ZrleEncoder.cpp"
 				>
 			</File>
 		</Filter>
@@ -675,11 +683,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RreEncoder.h"
+				>
+			</File>
+			<File
 				RelativePath=".\TightEncoder.h"
 				>
 			</File>
 			<File
 				RelativePath=".\TightPalette.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ZrleEncoder.h"
 				>
 			</File>
 		</Filter>

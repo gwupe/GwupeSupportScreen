@@ -53,8 +53,18 @@ const UINT32 ControlClient::REQUIRES_AUTH[] = { ControlProto::ADD_CLIENT_MSG_ID,
                                                 ControlProto::SHARE_DISPLAY_MSG_ID,
                                                 ControlProto::SHARE_WINDOW_MSG_ID,
                                                 ControlProto::SHARE_RECT_MSG_ID,
+                                                ControlProto::SHARE_APP_MSG_ID,
                                                 ControlProto::SHARE_FULL_MSG_ID,
                                                 ControlProto::CONNECT_TO_TCPDISP_MSG_ID };
+
+const UINT32 ControlClient::WITHOUT_AUTH[] = {
+  ControlProto::AUTH_MSG_ID,
+  ControlProto::RELOAD_CONFIG_MSG_ID,
+  ControlProto::GET_SERVER_INFO_MSG_ID,
+  ControlProto::GET_CLIENT_LIST_MSG_ID,
+  ControlProto::GET_SHOW_TRAY_ICON_FLAG,
+  ControlProto::UPDATE_TVNCONTROL_PROCESS_ID_MSG_ID
+};
 
 ControlClient::ControlClient(Transport *transport,
                              RfbClientManager *rfbClientManager,
@@ -64,7 +74,9 @@ ControlClient::ControlClient(Transport *transport,
   m_authenticator(authenticator),
   m_tcpDispId(0),
   m_pipeHandle(pipeHandle),
-  m_log(log)
+  m_authReqMessageId(0),
+  m_log(log),
+  m_repeatAuthPassed(false)
 {
   m_stream = m_transport->getIOStream();
 
@@ -97,13 +109,14 @@ void ControlClient::execute()
       m_log->detail(_T("Recieved control message ID %u, size %u"),
                   (unsigned int)messageId, (unsigned int)messageSize);
 
-      bool requiresControlAuth = false;
+      bool requiresControlAuth = Configurator::getInstance()->getServerConfig()->isControlAuthEnabled();
+      bool repeatAuthEnabled = Configurator::getInstance()->getServerConfig()->getControlAuthAlwaysChecking();
 
        // Check if message requires TightVNC admin privilegies.
-      if (Configurator::getInstance()->getServerConfig()->isControlAuthEnabled()) {
-        for (size_t i = 0; i < sizeof(REQUIRES_AUTH) / sizeof(UINT32); i++) {
-          if (messageId == REQUIRES_AUTH[i]) {
-            requiresControlAuth = true;
+      if (requiresControlAuth) {
+        for (size_t i = 0; i < sizeof(WITHOUT_AUTH) / sizeof(UINT32); i++) {
+          if (messageId == WITHOUT_AUTH[i]) {
+            requiresControlAuth = false;
             break;
           }
         }
@@ -111,13 +124,21 @@ void ControlClient::execute()
 
       try {
         // Message requires control auth: skip message body and sent reply.
-        if (requiresControlAuth && !m_authPassed) {
-          m_log->detail(_T("Message requires control authentication"));
+        if (requiresControlAuth) {
+          bool authPassed = m_authPassed;
+          if (repeatAuthEnabled) {
+            authPassed = authPassed && m_authReqMessageId == messageId && m_repeatAuthPassed;
+          }
+          m_repeatAuthPassed = false;
+          if (!authPassed) {
+            m_log->detail(_T("Message requires control authentication"));
 
-          m_gate->skipBytes(messageSize);
-          m_gate->writeUInt32(ControlProto::REPLY_AUTH_NEEDED);
+            m_gate->skipBytes(messageSize);
+            m_gate->writeUInt32(ControlProto::REPLY_AUTH_NEEDED);
+            m_authReqMessageId = messageId;
 
-          continue;
+            continue;
+          }
         }
 
         switch (messageId) {
@@ -189,6 +210,10 @@ void ControlClient::execute()
           m_log->message(_T("Share full message recieved"));
           shareFullIdMsgRcvd();
           break;
+        case ControlProto::SHARE_APP_MSG_ID:
+          m_log->message(_T("Share app message recieved"));
+          shareAppIdMsgRcvd();
+          break;
         default:
           m_gate->skipBytes(messageSize);
           m_log->warning(_T("Received unsupported message from control client"));
@@ -251,6 +276,7 @@ void ControlClient::authMsgRcdv()
   } else {
     m_gate->writeUInt32(ControlProto::REPLY_OK);
     m_authPassed = true;
+    m_repeatAuthPassed = true;
   }
 }
 
@@ -499,6 +525,16 @@ void ControlClient::shareFullIdMsgRcvd()
 
   ViewPortState dynViewPort;
   dynViewPort.setFullDesktop();
+  m_rfbClientManager->setDynViewPort(&dynViewPort);
+}
+
+void ControlClient::shareAppIdMsgRcvd()
+{
+  unsigned int procId = m_gate->readUInt32();
+  m_gate->writeUInt32(ControlProto::REPLY_OK);
+
+  ViewPortState dynViewPort;
+  dynViewPort.setProcessId(procId);
   m_rfbClientManager->setDynViewPort(&dynViewPort);
 }
 

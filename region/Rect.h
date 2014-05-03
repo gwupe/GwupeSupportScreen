@@ -84,6 +84,16 @@ public:
     return true;
   }
 
+  // Return true this Rect fully contain the inner Rect, otherwise return false.
+  inline bool isFullyContainRect(const Rect *inner) {
+    if (inner->left < left || inner->top < top ||
+        inner->right > right || inner->bottom > bottom) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   // Convert to windows RECT
   inline RECT toWindowsRect() const {
                                 RECT winRect;

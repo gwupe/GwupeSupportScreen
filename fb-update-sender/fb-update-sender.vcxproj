@@ -249,7 +249,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CursorUpdates.cpp" />
-    <ClCompile Include="FrameBufferAccessor.cpp" />
     <ClCompile Include="UpdateSender.cpp" />
     <ClCompile Include="UpdSenderMsgDefs.cpp" />
     <ClCompile Include="ViewPort.cpp" />
@@ -257,7 +256,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CursorUpdates.h" />
-    <ClInclude Include="FrameBufferAccessor.h" />
     <ClInclude Include="UpdateRequestListener.h" />
     <ClInclude Include="UpdateSender.h" />
     <ClInclude Include="UpdSenderMsgDefs.h" />

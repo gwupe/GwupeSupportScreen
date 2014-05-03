@@ -24,7 +24,7 @@
 
 #include "TightDecoder.h"
 
-#include "StandardPixelFormatFactory.h"
+#include "rfb/StandardPixelFormatFactory.h"
 
 TightDecoder::TightDecoder(LogWriter *logWriter)
 : DecoderOfRectangle(logWriter),
@@ -110,9 +110,9 @@ UINT32 TightDecoder::readTightPixel(RfbInputGate *input, int bytesPerCPixel)
 {
   UINT32 color = 0;
   UINT8 buffer[sizeof(color)];
-  if (!m_isCPixel)
+  if (!m_isCPixel) {
     input->readFully(buffer, bytesPerCPixel);
-  else {
+  } else {
     buffer[3] = 0;
     buffer[2] = input->readUInt8();
     buffer[1] = input->readUInt8();
@@ -176,7 +176,7 @@ void TightDecoder::processJpeg(RfbInputGate *input,
       } else {
         drawJpegBytes(frameBuffer, &pixels, dstRect);
       }
-    } catch (Exception &ex) {
+    } catch (const Exception &ex) {
       StringStorage error;
       error.format(_T("Error in tight-decoder, subencoding \"jpeg\": %s"), 
                    ex.getMessage());
@@ -274,17 +274,23 @@ void TightDecoder::readCompressedData(RfbInputGate *input,
   vector<char> compressed(rawDataLength);
 
   // read compressed (raw) data behind space allocated for decompressed data
-  input->readFully(&compressed.front(), rawDataLength);
+  if (rawDataLength != 0) {
+    input->readFully(&compressed.front(), rawDataLength);
 
-  Inflater *decoder = m_inflater[decoderId];
-  decoder->setInput(&compressed.front(), rawDataLength);
-  decoder->setUnpackedSize(expectedLength);
-  decoder->inflate();
+    Inflater *decoder = m_inflater[decoderId];
+    decoder->setInput(&compressed.front(), rawDataLength);
+    decoder->setUnpackedSize(expectedLength);
+    decoder->inflate();
 
-  size_t size = decoder->getOutputSize();
-  const char *output = decoder->getOutput();
-  buffer.resize(size);
-  buffer.assign(output, output + size);
+    size_t size = decoder->getOutputSize();
+    const char *output = decoder->getOutput();
+    buffer.resize(size);
+    buffer.assign(output, output + size);
+  } else {
+    _ASSERT(rawDataLength != 0);
+    m_logWriter->debug(_T("Tight decoder: Length of Raw compressed data is 0"));
+    buffer.resize(0);
+  }
 }
 
 void TightDecoder::drawPalette(FrameBuffer *fb,
@@ -318,7 +324,11 @@ void TightDecoder::drawPalette(FrameBuffer *fb,
   } else { // size of palette != 2
     for (int i = 0; i < dstLength; i++) {
       void *pixelPtr = fb->getBufferPtr(x + i % width, y + i / width);
-      memcpy(pixelPtr, &palette[pixels[i]], bytesPerPixel);
+      if (pixels[i] < palette.size()) {
+        memcpy(pixelPtr, &palette[pixels[i]], bytesPerPixel);
+      } else {
+        m_logWriter->error(_T("Tight decoder: Invalid index in palette."));
+      }
     }
   }
 }
@@ -405,8 +415,9 @@ void TightDecoder::drawGradient(FrameBuffer *fb,
   PixelFormat pxFormat = fb->getPixelFormat();
   int fbBytesPerPixel = fb->getBytesPerPixel();
   int bytesPerCPixel = fbBytesPerPixel;
-  if (m_isCPixel)
+  if (m_isCPixel) {
     bytesPerCPixel = 3;
+  }
 
   int opRowIndex = 0;
   UINT16 max[3] = {pxFormat.redMax, pxFormat.greenMax, pxFormat.blueMax};
@@ -421,11 +432,11 @@ void TightDecoder::drawGradient(FrameBuffer *fb,
     for (size_t j = 3; j < opRowLength; j += 3, pixelOffset += bytesPerCPixel) {
       UINT8 rawColor[3];
       fillRawComponents(&pxFormat, rawColor, pixels, pixelOffset);
-      int color = 0;
+      UINT32 color = 0;
       for (int index = 0; index < 3; index++) {
-        int d = prevRow[j + index] +      // "upper" pixel (from prev row)
-                thisRow[j + index - 3] -  // prev pixel
-                prevRow[j + index - 3];   // "diagonal" prev pixel
+        INT32 d = prevRow[j + index] +      // "upper" pixel (from prev row)
+                  thisRow[j + index - 3] -  // prev pixel
+                  prevRow[j + index - 3];   // "diagonal" prev pixel
         UINT16 converted = d < 0 ? 0 : d > max[index] ? max[index] : d;
         thisRow[j + index] = (converted + rawColor[index]) & max[index];
         color |= (thisRow[j + index] & max[index]) << shift[index];
@@ -439,12 +450,13 @@ void TightDecoder::drawGradient(FrameBuffer *fb,
 
 UINT32 TightDecoder::getRawTightColor(const PixelFormat *pxFormat,
                                       const vector<UINT8> &pixels,
-                                      size_t offset)
+                                      const size_t offset)
 {
-  if (m_isCPixel)
-    return pixels[offset++] << 16 |
-           pixels[offset++] << 8 |
-           pixels[offset++];
+  if (m_isCPixel) {
+    return pixels[offset] << 16 |
+           pixels[offset + 1] << 8 |
+           pixels[offset + 2];
+  }
   UINT32 rawColor = 0;
   memcpy(&rawColor, &pixels[offset], pxFormat->bitsPerPixel / 8);
   return rawColor;
@@ -453,7 +465,7 @@ UINT32 TightDecoder::getRawTightColor(const PixelFormat *pxFormat,
 void TightDecoder::fillRawComponents(const PixelFormat *pxFormat,
                                      UINT8 components[],
                                      const vector<UINT8> &pixels,
-                                     size_t pixelOffset)
+                                     const size_t pixelOffset)
 {
   int rawColor = getRawTightColor(pxFormat, pixels, pixelOffset);
   components[0] = rawColor >> pxFormat->redShift & pxFormat->redMax;

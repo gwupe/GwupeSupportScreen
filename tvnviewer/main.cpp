@@ -65,29 +65,30 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE,
                         ApplicationNames::WINDOW_CLASS_NAME,
                         WindowNames::TVN_WINDOW_CLASS_NAME);
     if (isListening) {
-      tvnViewer.startListening(&conConf, ConnectionListener::DEFAULT_PORT);
+      // FIXME: set listening connection options.
+      tvnViewer.startListening(ConnectionListener::DEFAULT_PORT);
     } else if (!condata.isEmpty()) {
       tvnViewer.newConnection(&condata, &conConf);
     } else {
       tvnViewer.showLoginDialog();
     }
     result = tvnViewer.run();
-  } catch (CommandLineFormatException &exception) {
+  } catch (const CommandLineFormatException &exception) {
     StringStorage strError(exception.getMessage());
     MessageBox(0,
                strError.getString(),
                ProductNames::VIEWER_PRODUCT_NAME,
                MB_OK | MB_ICONERROR);
     return 0;
-  } catch (CommandLineFormatHelp &) {
+  } catch (const CommandLineFormatHelp &) {
     cmd.onHelp();
     return 0;
-  } catch (Exception &excep) {
+  } catch (const Exception &ex) {
     MessageBox(0,
                StringTable::getString(IDS_UNKNOWN_ERROR_IN_VIEWER),
                ProductNames::VIEWER_PRODUCT_NAME,
                MB_OK | MB_ICONERROR);
-    logWriter.debug(excep.getMessage());
+    logWriter.debug(ex.getMessage());
   }
 
   return result;

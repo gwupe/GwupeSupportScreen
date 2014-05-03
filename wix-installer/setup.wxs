@@ -71,7 +71,9 @@
     <UIRef Id="WixUI_ErrorProgressText" />
 
     <Icon Id="tvnserver.ico" SourceFile="tvnserver.ico" />
+    <?ifndef VIEWER_FREE ?>
     <Icon Id="viewer.ico" SourceFile="vncviewer.ico" />
+    <?endif?>
 
     <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
     <!--<WixVariable Id="WixUIBannerBmp" Value="\banner.bmp" />-->

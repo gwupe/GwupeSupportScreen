@@ -697,6 +697,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WinCursor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\WindowsApplication.cpp"
 				>
 			</File>
@@ -713,6 +717,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WinHooks.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\WinProcessCommandLine.cpp"
 				>
 			</File>
@@ -726,6 +734,10 @@
 			</File>
 			<File
 				RelativePath=".\Workstation.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WsaStartup.cpp"
 				>
 			</File>
 			<File
@@ -772,6 +784,10 @@
 			</File>
 			<File
 				RelativePath=".\Environment.h"
+				>
+			</File>
+			<File
+				RelativePath=".\HookEventListener.h"
 				>
 			</File>
 			<File
@@ -887,6 +903,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WinCursor.h"
+				>
+			</File>
+			<File
 				RelativePath=".\WindowsApplication.h"
 				>
 			</File>
@@ -903,6 +923,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WinHooks.h"
+				>
+			</File>
+			<File
 				RelativePath=".\WinProcessCommandLine.h"
 				>
 			</File>
@@ -916,6 +940,10 @@
 			</File>
 			<File
 				RelativePath=".\Workstation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WsaStartup.h"
 				>
 			</File>
 			<File

@@ -131,6 +131,18 @@ HWND DesktopBaseImpl::getWindowHandleByName(const StringStorage *windowName)
   return 0;
 }
 
+void DesktopBaseImpl::getApplicationRegion(unsigned int procId, Region *region)
+{
+  _ASSERT(m_userInput != 0);
+  _ASSERT(m_extDeskTermListener != 0);
+  m_log->info(_T("get application region"));
+  try {
+    m_userInput->getApplicationRegion(procId, region);
+  } catch (...) {
+    m_extDeskTermListener->onAbnormalDesktopTerminate();
+  }
+}
+
 bool DesktopBaseImpl::isRemoteInputAllowed()
 {
   m_log->info(_T("checking remote input allowing"));
@@ -227,7 +239,6 @@ void DesktopBaseImpl::sendUpdate()
     m_log->info(_T("UpdateContainer is not empty.")
               _T(" Updates will be given to all."));
     m_extUpdSendingListener->onSendUpdate(&updCont,
-                                          m_updateHandler->getFrameBuffer(),
                                           m_updateHandler->getCursorShape());
     m_log->info(_T("Updates have been given to all."));
     AutoLock al(&m_reqRegMutex);
@@ -267,4 +278,10 @@ void DesktopBaseImpl::onClipboardUpdate(const StringStorage *newClipboard)
 void DesktopBaseImpl::onConfigReload(ServerConfig *serverConfig)
 {
   applyNewConfiguration();
+}
+
+bool DesktopBaseImpl::updateExternalFrameBuffer(FrameBuffer *fb, const Region *region,
+                                           const Rect *viewPort)
+{
+  return m_updateHandler->updateExternalFrameBuffer(fb, region, viewPort);
 }

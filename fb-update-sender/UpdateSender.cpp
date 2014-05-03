@@ -33,9 +33,13 @@
 
 UpdateSender::UpdateSender(RfbCodeRegistrator *codeRegtor,
                            UpdateRequestListener *updReqListener,
+                           SenderControlInformationInterface *senderControlInformation,
                            RfbOutputGate *output, int id,
+                           Desktop *desktop,
                            LogWriter *log)
 : m_updReqListener(updReqListener),
+  m_desktop(desktop),
+  m_senderControlInformation(senderControlInformation),
   m_busy(false),
   m_incrUpdIsReq(false),
   m_fullUpdIsReq(false),
@@ -44,6 +48,7 @@ UpdateSender::UpdateSender(RfbCodeRegistrator *codeRegtor,
   m_enbox(&m_pixelConverter, m_output),
   m_id(id),
   m_videoFrozen(false),
+  m_shareOnlyApp(false),
   m_log(log),
   m_cursorUpdates(log)
 {
@@ -129,79 +134,29 @@ void UpdateSender::init(const Dimension *viewPortDimension,
 }
 
 void UpdateSender::newUpdates(const UpdateContainer *updateContainer,
-                              const FrameBuffer *frameBuffer,
-                              const CursorShape *cursorShape,
-                              const Rect *viewPort)
+                              const CursorShape *cursorShape)
 {
   m_log->debug(_T("New updates passed to client #%d"), m_id);
-  addUpdateContainer(updateContainer, frameBuffer, viewPort);
+  addUpdateContainer(updateContainer);
 
   m_cursorUpdates.updateCursorShape(cursorShape);
 
   AutoLock al(&m_reqRectLocMut);
-  if (clientIsReady()) {
-    m_log->debug(_T("Client #%d is ready for updates, waking up"), m_id);
-    m_busy = true;
-    m_newUpdatesEvent.notify();
-  } else {
-    m_log->debug(_T("Client #%d is not ready for updates, not waking"), m_id);
-  }
+  m_busy = true;
+  m_newUpdatesEvent.notify();
+  m_log->debug(_T("Client #%d is waking up"), m_id);
 }
 
-void UpdateSender::addUpdateContainer(const UpdateContainer *updateContainer,
-                                      const FrameBuffer *srcFb,
-                                      const Rect *viewPort)
+void UpdateSender::addUpdateContainer(const UpdateContainer *updateContainer)
 {
   UpdateContainer updCont = *updateContainer;
 
-  bool viewPortChanged = false;
-  {
-    AutoLock al(&m_viewPortMut);
-    viewPortChanged = !m_viewPort.isEqualTo(viewPort);
-    m_viewPort = *viewPort;
-  }
+  Rect viewPort = getViewPort();
 
-  if (viewPortChanged) {
-    updCont.changedRegion.addRect(viewPort);
-    updCont.copiedRegion.clear();
-  }
-
-  updCont.videoRegion.translate(-viewPort->left, -viewPort->top);
-  updCont.changedRegion.translate(-viewPort->left, -viewPort->top);
-  updCont.copiedRegion.translate(-viewPort->left, -viewPort->top);
-  updCont.copySrc.move(-viewPort->left, -viewPort->top);
-
-  FrameBuffer *fbForReceive = m_fbAccessor.getFbForWriting(srcFb,
-                                                           &m_viewPort);
-
-  // Frame buffers synchronizing
-  // Use stored information too.
-  UpdateContainer storedUpdCont;
-  m_updateKeeper->getUpdateContainer(&storedUpdCont);
-
-  Region changedAndCopyRgns = storedUpdCont.changedRegion;
-  changedAndCopyRgns.add(&updCont.changedRegion);
-  changedAndCopyRgns.add(&updCont.copiedRegion);
-  changedAndCopyRgns.add(&updCont.videoRegion);
-  changedAndCopyRgns.addRect(&m_cursorUpdates.getBackgroundRect());
-  {
-    AutoLock al(&m_reqRectLocMut);
-    changedAndCopyRgns.add(&m_requestedFullReg);
-  }
-
-  // Croping out of rectangles
-  changedAndCopyRgns.crop(&fbForReceive->getDimension().getRect());
-
-  std::vector<Rect> rects;
-  std::vector<Rect>::iterator iRect;
-  changedAndCopyRgns.getRectVector(&rects);
-
-  for (iRect = rects.begin(); iRect < rects.end(); iRect++) {
-    Rect *rect = &(*iRect);
-    fbForReceive->copyFrom(rect, srcFb,
-                           rect->left + viewPort->left,
-                           rect->top + viewPort->top);
-  }
+  updCont.videoRegion.translate(-viewPort.left, -viewPort.top);
+  updCont.changedRegion.translate(-viewPort.left, -viewPort.top);
+  updCont.copiedRegion.translate(-viewPort.left, -viewPort.top);
+  updCont.copySrc.move(-viewPort.left, -viewPort.top);
 
   m_updateKeeper->addUpdateContainer(&updCont);
 }
@@ -359,14 +314,21 @@ void UpdateSender::sendUpdate()
              (int)requestedFullReg.getCount());
 
   UpdateContainer updCont;
-  extractUpdates(&updCont, &requestedIncrReg, &requestedFullReg);
+  extractUpdates(&updCont);
 
   EncodeOptions encodeOptions;
   selectEncoder(&encodeOptions);
 
-  // Frame buffer remember
-  AutoLock al(&m_fbAccessor);
-  FrameBuffer *frameBuffer = m_fbAccessor.getFbForReading();
+  // Viewport calculating
+  Rect viewPort;
+  bool shareOnlyApp;
+  Region prevShareAppRegion;
+  Region shareAppRegion;
+  bool viewPortChanged = updateViewPort(&viewPort, &shareOnlyApp, &prevShareAppRegion,
+                                        &shareAppRegion);
+
+  updateFrameBuffer(&updCont, shareOnlyApp, &prevShareAppRegion, &shareAppRegion);
+  FrameBuffer *frameBuffer = &m_frameBuffer;
 
   AutoLock l(m_output);
 
@@ -377,12 +339,6 @@ void UpdateSender::sendUpdate()
     lastViewPortDim = m_lastViewPortDim;
   }
 
-  // Viewport calculating
-  Rect viewPort;
-  {
-    AutoLock al(&m_viewPortMut);
-    viewPort = m_viewPort;
-  }
   // If client does not support the desktop resizing then view port dimension
   // must be no more than client dimension.
   if (!encodeOptions.desktopSizeEnabled()) {
@@ -392,9 +348,12 @@ void UpdateSender::sendUpdate()
   }
 
   // Checking for screen size changing
-  if (lastViewPortDim != Dimension(&viewPort) ||
-      updCont.screenSizeChanged) {
+  bool dimensionChanged = lastViewPortDim != Dimension(&viewPort) || updCont.screenSizeChanged;
+  if (dimensionChanged) {
     updCont.screenSizeChanged = true;
+  }
+  if (dimensionChanged || viewPortChanged) {
+    updCont.copiedRegion.clear();
 
     AutoLock al(&m_viewPortMut);
     m_lastViewPortDim.setDim(&viewPort);
@@ -455,35 +414,59 @@ void UpdateSender::sendUpdate()
                            &updCont,
                            !requestedFullReg.isEmpty(),
                            &viewPort,
+                           shareOnlyApp,
+                           &shareAppRegion,
                            frameBuffer,
                            &cursorShape);
 
-    if (!encodeOptions.copyRectEnabled()) {
+    if (!encodeOptions.copyRectEnabled() || getVideoFrozen()) {
       m_log->debug(_T("CopyRect is disabled, converting to normal updates"));
       updCont.changedRegion.add(&updCont.copiedRegion);
       updCont.copiedRegion.clear();
     }
 
-    Region videoRegion = updCont.videoRegion;
-    Region changedRegion = updCont.changedRegion;
-
-    videoRegion.subtract(&requestedFullReg);
-    changedRegion.subtract(&videoRegion);
+    updCont.changedRegion.add(&m_prevVideoRegion); // This line updates rid video places when
+                                                   // video is frozen.
+    updCont.videoRegion.subtract(&requestedFullReg);
+    updCont.changedRegion.subtract(&updCont.videoRegion);
+    m_prevVideoRegion = updCont.videoRegion;
     if (getVideoFrozen()) {
-      videoRegion.clear();
+      updCont.videoRegion.clear();
     }
-    changedRegion.add(&requestedFullReg);
+    updCont.changedRegion.add(&requestedFullReg);
 
     // FIXME: Are these two lines really needed? Check that carefully.
     Rect frameBufferRect = frameBuffer->getDimension().getRect();
-    videoRegion.crop(&frameBufferRect);
-    changedRegion.crop(&frameBufferRect);
+    updCont.videoRegion.crop(&frameBufferRect);
+    updCont.changedRegion.crop(&frameBufferRect);
+    shareAppRegion.crop(&frameBufferRect);
+    prevShareAppRegion.crop(&frameBufferRect);
 
     // If Tight encoding is not supported by the client, convert video updates
     // to normal updates so that the preferred encoding will be used.
     if (!encodeOptions.encodingEnabled(EncodingDefs::TIGHT)) {
-      changedRegion.add(&videoRegion);
-      videoRegion.clear();
+      updCont.changedRegion.add(&updCont.videoRegion);
+      updCont.videoRegion.clear();
+    }
+
+    // Crop changed and video region by requested regions.
+    cropUpdContForReqRegions(&updCont, &requestedIncrReg, &requestedFullReg);
+
+    Region videoRegion = updCont.videoRegion;
+    Region changedRegion = updCont.changedRegion;
+
+    if (shareOnlyApp) {
+      Region newOpeningAppRegion = shareAppRegion;
+      newOpeningAppRegion.subtract(&prevShareAppRegion);
+
+      Region blackRegion = changedRegion;
+      blackRegion.add(&videoRegion);
+      blackRegion.add(&prevShareAppRegion);
+      blackRegion.subtract(&shareAppRegion);
+      changedRegion.add(&blackRegion);
+      changedRegion.add(&newOpeningAppRegion);
+      // Paint black in the framebuffer for the black region.
+      paintBlack(frameBuffer, &blackRegion);
     }
 
     //
@@ -576,6 +559,15 @@ void UpdateSender::sendUpdate()
   m_output->flush();
 }
 
+void UpdateSender::paintBlack(FrameBuffer *frameBuffer, const Region *blackRegion)
+{
+  std::vector<Rect> blackRects;
+  blackRegion->getRectVector(&blackRects);
+  for (size_t i = 0; i < blackRects.size(); i++) {
+    frameBuffer->fillRect(&blackRects[i], 0);
+  }
+}
+
 void UpdateSender::splitRegion(Encoder *encoder,
                                const Region *region,
                                std::vector<Rect> *rects,
@@ -608,6 +600,7 @@ void UpdateSender::execute()
 
   while(!isTerminating()) {
     m_newUpdatesEvent.waitForEvent();
+    m_busy = true;
     m_log->debug(_T("Update sender thread of client #%d is awake"), m_id);
     if (!isTerminating()) {
       try {
@@ -616,7 +609,7 @@ void UpdateSender::execute()
         m_log->debug(_T("The sendUpdate() function has finished"));
         m_busy = false;
       } catch(Exception &e) {
-        m_log->debug(_T("The update sender thread caught an error and will")
+        m_log->interror(_T("The update sender thread caught an error and will")
                    _T(" be terminated: %s"), e.getMessage());
         Thread::terminate();
       }
@@ -634,6 +627,7 @@ void UpdateSender::readUpdateRequest(RfbInputGate *io)
   reqRect.setWidth(io->readUInt16());
   reqRect.setHeight(io->readUInt16());
 
+  Region combinedReqRegions;
   {
     AutoLock al(&m_reqRectLocMut);
     if (incremental) {
@@ -644,6 +638,8 @@ void UpdateSender::readUpdateRequest(RfbInputGate *io)
       m_fullUpdIsReq = true;
     }
     m_requestTimePoint = DateTime::now();
+    combinedReqRegions.add(&m_requestedIncrReg);
+    combinedReqRegions.add(&m_requestedFullReg);
   }
 
   m_log->detail(_T("update requested (%d, %d, %dx%d, incremental = %d)")
@@ -653,6 +649,15 @@ void UpdateSender::readUpdateRequest(RfbInputGate *io)
               m_id);
 
   _ASSERT(m_updReqListener != 0);
+
+  bool alreadyHasUpdates = m_updateKeeper->checkForUpdates(&combinedReqRegions);
+  if (alreadyHasUpdates) {
+    // We should initiaite send update to avoid it skipping on no updates from a desktop
+    // FIXME: Code duplication, see the newUpdates() function.
+    m_newUpdatesEvent.notify();
+    m_log->debug(_T("Client #%d is waking up"), m_id);
+  }
+
   m_updReqListener->onUpdateRequest(&reqRect, incremental);
 }
 
@@ -764,19 +769,58 @@ bool UpdateSender::extractReqRegions(Region *incrReqReg,
   return *incrUpdIsReq || *fullUpdIsReq;
 }
 
-void UpdateSender::extractUpdates(UpdateContainer *updCont,
-                                  const Region *incrReqReg,
-                                  const Region *fullReqReg)
+void UpdateSender::extractUpdates(UpdateContainer *updCont)
 {
   m_updateKeeper->extract(updCont);
+}
+
+void UpdateSender::cropUpdContForReqRegions(UpdateContainer *updCont,
+                                            const Region *incrReqReg,
+                                            const Region *fullReqReg)
+{
   // Crop by requested region
-  Region outRegion = updCont->changedRegion;
+  Region backRegion = updCont->changedRegion;
+  backRegion.add(&updCont->videoRegion);
+
   Region combinedReqRegion = *incrReqReg;
   combinedReqRegion.add(fullReqReg);
-  outRegion.subtract(&combinedReqRegion);
+
+  inscribeCopiedRegionToReqRegion(updCont, &combinedReqRegion);
+
+  backRegion.subtract(&combinedReqRegion);
   updCont->changedRegion.intersect(&combinedReqRegion);
+  updCont->videoRegion.intersect(&combinedReqRegion);
+
   // Return back the out region to the update keeper.
-  m_updateKeeper->addChangedRegion(&outRegion);
+  m_updateKeeper->addChangedRegion(&backRegion);
+}
+
+void UpdateSender::inscribeCopiedRegionToReqRegion(UpdateContainer *updCont,
+                                                   const Region *requestRegion)
+{
+  // Test copied region. If it is fully inside in the requested region then
+  // there is no to change. Otherwise, simply decline copied region.
+  if (!updCont->copiedRegion.isEmpty()) {
+    Region dstCopiedRegion = updCont->copiedRegion;
+    dstCopiedRegion.subtract(requestRegion);
+
+    bool copiedRegionFullyInscribed = dstCopiedRegion.isEmpty();
+    if (copiedRegionFullyInscribed) {
+      // Then see the same at source coordinates.
+      Region copiedRegion = updCont->copiedRegion;
+      Rect dstBounds = copiedRegion.getBounds();
+      int dx = updCont->copySrc.x - dstBounds.left;
+      int dy = updCont->copySrc.y - dstBounds.top;
+      copiedRegion.translate(dx, dy);
+      copiedRegion.subtract(requestRegion);
+      copiedRegionFullyInscribed = copiedRegion.isEmpty();
+    }
+    if (!copiedRegionFullyInscribed) {
+      // Convert copied region to changed region.
+      updCont->changedRegion.add(&updCont->copiedRegion);
+      updCont->copiedRegion.clear();
+    }
+  }
 }
 
 void UpdateSender::selectEncoder(EncodeOptions *encodeOptions)
@@ -790,4 +834,59 @@ void UpdateSender::selectEncoder(EncodeOptions *encodeOptions)
   // Make sure the encoder object corresponds to the preferred encoding
   // requested in the most recent SetEncodings client message.
   m_enbox.selectEncoder(encodeOptions->getPreferredEncoding());
+}
+
+void UpdateSender::updateFrameBuffer(UpdateContainer *updCont,
+                                     bool shareOnlyApp, const Region *prevSharedRegion,
+                                     const Region *shareAppRegion)
+{
+  Rect viewPort = getViewPort();
+
+  Region newOpeningPixels;
+  if (shareOnlyApp) {
+    updCont->changedRegion.add(&updCont->copiedRegion);
+    updCont->copiedRegion.clear();
+    m_appRegion = *shareAppRegion;
+    newOpeningPixels = m_appRegion;
+    newOpeningPixels.subtract(&m_prevAppRegion);
+  }
+
+  // Also, if shareapp checked then just opening application pixels can be already painted
+  // to black and does not include to changed region (when prev pixel value = current value).
+  // Thereby, new opening pixels must be updated in the framebuffer too. New opening pixels,
+  // for example, appears when alien application creep on the shared application.
+  updCont->changedRegion.add(&newOpeningPixels);
+
+  // Frame buffers synchronizing
+  Region changedAndCopyRgns = updCont->changedRegion;
+  changedAndCopyRgns.add(&updCont->copiedRegion);
+  changedAndCopyRgns.add(&updCont->videoRegion);
+  changedAndCopyRgns.addRect(&m_cursorUpdates.getBackgroundRect());
+  {
+    AutoLock al(&m_reqRectLocMut);
+    changedAndCopyRgns.add(&m_requestedFullReg);
+  }
+
+  updCont->screenSizeChanged = !m_desktop->updateExternalFrameBuffer(&m_frameBuffer, &changedAndCopyRgns, &viewPort) ||
+                               updCont->screenSizeChanged;
+}
+
+bool UpdateSender::updateViewPort(Rect *outNewViewPort, bool *shareApp, Region *prevShareAppRegion,
+                                  Region *newShareAppRegion)
+{
+  Rect newViewPort;
+  m_senderControlInformation->onGetViewPort(&newViewPort, shareApp, newShareAppRegion);
+
+  AutoLock al(&m_viewPortMut);
+  bool viewPortChanged = !m_viewPort.isEqualTo(&newViewPort);
+  if (viewPortChanged) {
+    m_viewPort = newViewPort;
+  }
+
+  bool shareAppModeChanged = *shareApp != m_shareOnlyApp;
+  // Emulating share app mode changes as view port changes.
+  viewPortChanged = viewPortChanged || shareAppModeChanged;
+
+  *outNewViewPort = newViewPort;
+  return viewPortChanged;
 }

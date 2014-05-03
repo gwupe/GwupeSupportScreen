@@ -25,7 +25,6 @@
 #ifndef __MIRRORSCREENDRIVER_H__
 #define __MIRRORSCREENDRIVER_H__
 
-#include "ScreenDriver.h"
 #include "MirrorDriverClient.h"
 #include "win-system/RegistryKey.h"
 #include "DisplayEsc.h"
@@ -33,8 +32,7 @@
 #include "win-system/WindowsEvent.h"
 #include "UpdateDetector.h"
 
-class MirrorScreenDriver : public ScreenDriver,
-                           public UpdateDetector
+class MirrorScreenDriver : public UpdateDetector
 {
 public:
   MirrorScreenDriver(UpdateKeeper *updateKeeper,

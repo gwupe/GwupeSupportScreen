@@ -30,9 +30,7 @@
 #include "desktop/UpdateKeeper.h"
 #include "UpdateRequestListener.h"
 #include "rfb/FrameBuffer.h"
-#include "desktop/WindowsMouseGrabber.h"
 #include "ViewPort.h"
-#include "FrameBufferAccessor.h"
 #include "network/RfbOutputGate.h"
 #include "network/RfbInputGate.h"
 #include "rfb-sconn/Encoder.h"
@@ -42,6 +40,7 @@
 #include "rfb-sconn/RfbCodeRegistrator.h"
 #include "util/DateTime.h"
 #include "CursorUpdates.h"
+#include "SenderControlInformationInterface.h"
 
 class UpdateSender : public Thread, public RfbDispatcherListener
 {
@@ -50,9 +49,11 @@ public:
   // update reqest to out.
   // FIXME: Document all the arguments properly.
   UpdateSender(RfbCodeRegistrator *codeRegtor,
-               UpdateRequestListener *updReqListener, RfbOutputGate *output,
-               int id, LogWriter *log);
-  virtual ~UpdateSender(void);
+               UpdateRequestListener *updReqListener,
+               SenderControlInformationInterface *senderControlInformation,
+               RfbOutputGate *output,
+               int id, Desktop *desktop, LogWriter *log);
+  virtual ~UpdateSender();
 
   // The sendServerInit() function sends first rfb init message to a client
   // FIXME: The comment does not seem to be relevant.
@@ -64,9 +65,7 @@ public:
   // notifies to thread.
   // FIXME: The comment does not seem to be relevant.
   void newUpdates(const UpdateContainer *updateContainer,
-                  const FrameBuffer *frameBuffer,
-                  const CursorShape *cursorShape,
-                  const Rect *viewPort);
+                  const CursorShape *cursorShape);
 
   // Block cursor pos sending by this connection to a client. Unblocking will
   // be automaticly for a time.
@@ -94,9 +93,7 @@ protected:
   // The addUpdateContainer() function adds all updates from the first
   // updateContainer parameter to the own UpdateContainer object.
   // This function may asynchronously be called from any threads.
-  void addUpdateContainer(const UpdateContainer *updateContainer,
-                          const FrameBuffer *srcFb,
-                          const Rect *viewPort);
+  void addUpdateContainer(const UpdateContainer *updateContainer);
 
   // The sender thread.
   virtual void execute();
@@ -123,10 +120,23 @@ protected:
                          bool *incrUpdIsReq,
                          bool *fullUpdIsReq,
                          DateTime *reqTimePoint);
-  void extractUpdates(UpdateContainer *updCont,
-                      const Region *incrReqReg,
-                      const Region *fullReqReg);
+  void extractUpdates(UpdateContainer *updCont);
+  void cropUpdContForReqRegions(UpdateContainer *updCont,
+                                const Region *incrReqReg,
+                                const Region *fullReqReg);
+  void inscribeCopiedRegionToReqRegion(UpdateContainer *updCont,
+                                       const Region *requestRegion);
+
   void selectEncoder(EncodeOptions *encodeOptions);
+
+  // Updates pixels in the internal frame buffer.
+  void updateFrameBuffer(UpdateContainer *updCont,
+                         bool shareOnlyApp, const Region *prevSharedRegion,
+                         const Region *shareAppRegion);
+  // Updates internal view port rectangle.
+  // Returns true if view port has been changed during the operation.
+  bool updateViewPort(Rect *outNewViewPort, bool *shareApp, Region *prevShareAppRegion,
+                      Region *newShareAppRegion);
 
   // The sendPalette() function sends pallete after a set color map request
   // by a client.
@@ -156,6 +166,9 @@ protected:
                       const FrameBuffer *frameBuffer,
                       const EncodeOptions *encodeOptions);
 
+  // This function paints black region in framebuffer.
+  void paintBlack(FrameBuffer *frameBuffer, const Region *blackRegion);
+
   // This function is used to split a region into a list of rectangles,
   // where actual splitting is performed by the specified encoder object.
   // We do not use m_encoder because this function may be used for the video
@@ -180,14 +193,20 @@ protected:
   DateTime m_requestTimePoint;
   LocalMutex m_reqRectLocMut;
 
+  SenderControlInformationInterface *m_senderControlInformation;
+
   Rect m_viewPort;
   Dimension m_clientDim;
   Dimension m_lastViewPortDim;
+  bool m_shareOnlyApp;
+  Region m_appRegion;
+  Region m_prevAppRegion;
   LocalMutex m_viewPortMut;
 
   UpdateKeeper *m_updateKeeper;
 
-  FrameBufferAccessor m_fbAccessor;
+  FrameBuffer m_frameBuffer;
+  Desktop *m_desktop;
 
   CursorUpdates m_cursorUpdates;
 
@@ -218,6 +237,8 @@ protected:
 
   // This flag indicates that video is frozen or not.
   bool m_videoFrozen;
+  // This region constains a video region which was sent at previous time.
+  Region m_prevVideoRegion;
   LocalMutex m_vidFreezeLocMut;
 
   // Output stream.

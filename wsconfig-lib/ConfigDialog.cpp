@@ -26,7 +26,7 @@
 #include "tvnserver/resource.h"
 #include "util/CommonHeader.h"
 
-ConfigDialog::ConfigDialog(bool forService, Command *reloadConfigCommand)
+ConfigDialog::ConfigDialog(bool forService, ControlCommand *reloadConfigCommand)
 : BaseDialog(IDD_CONFIG),
   m_isConfiguringService(forService),
   m_reloadConfigCommand(reloadConfigCommand),
@@ -60,7 +60,7 @@ void ConfigDialog::updateApplyButtonState()
   m_ctrlApplyButton.setEnabled(true);
 }
 
-void ConfigDialog::setConfigReloadCommand(Command *command)
+void ConfigDialog::setConfigReloadCommand(ControlCommand *command)
 {
   m_reloadConfigCommand = command;
 
@@ -197,8 +197,8 @@ void ConfigDialog::onCancelButtonClick()
 
 void ConfigDialog::onOKButtonClick()
 {
-  if (validateInput()) {
-    onApplyButtonClick();
+  onApplyButtonClick();
+  if (!m_ctrlApplyButton.isEnabled()) { // onApplyButtonClick() has been successfully processed.
     kill(0);
   }
 }
@@ -206,7 +206,7 @@ void ConfigDialog::onOKButtonClick()
 void ConfigDialog::onApplyButtonClick()
 {
   // Check values that specified in gui.
-  bool canApply = validateInput();
+  bool canApply = m_ctrlApplyButton.isEnabled() && validateInput();
 
   // Fill global server configuration with values from gui.
   if (canApply) {
@@ -223,10 +223,11 @@ void ConfigDialog::onApplyButtonClick()
   if (m_reloadConfigCommand != NULL) {
     m_reloadConfigCommand->execute();
 
-    m_administrationConfigDialog.updateUI();
-    m_ipAccessControlDialog.updateUI();
-
-    m_ctrlApplyButton.setEnabled(false);
+    if (m_reloadConfigCommand->executionResultOk()) {
+      m_administrationConfigDialog.updateUI();
+      m_ipAccessControlDialog.updateUI();
+      m_ctrlApplyButton.setEnabled(false);
+    }
   } else {
      // Else we're working in offline mode and we need to save config
     if (!m_config->save()) {

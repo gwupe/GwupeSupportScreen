@@ -26,6 +26,7 @@
 
 #include "ft-common/FTMessage.h"
 #include "rfb/AuthDefs.h"
+#include "rfb/TunnelDefs.h"
 #include "rfb/MsgDefs.h"
 #include "rfb/EncodingDefs.h"
 #include "rfb/VendorDefs.h"
@@ -154,6 +155,10 @@ void RemoteViewerCore::start(CoreEventsAdapter *adapter,
 {
   m_logWriter.detail(_T("Starting remote viewer core..."));
 
+  if (adapter == 0) {
+    throw Exception(_T("Remote viewer core is not started: adapter is 0"));
+  }
+
   // Set flag "wasStarted".
   // This flag protects of second call start().
   {
@@ -234,7 +239,7 @@ void RemoteViewerCore::setPixelFormat(const PixelFormat *pixelFormat)
 bool RemoteViewerCore::updatePixelFormat()
 {
   PixelFormat pxFormat;
-  m_logWriter.detail(_T("Updating pixel format..."));
+  m_logWriter.debug(_T("Check pixel format change..."));
   {
     AutoLock al(&m_pixelFormatLock);
     if (!m_isNewPixelFormat)
@@ -250,8 +255,11 @@ bool RemoteViewerCore::updatePixelFormat()
 
   {
     AutoLock al(&m_fbLock);
-    if (pxFormat.isEqualTo(&m_frameBuffer.getPixelFormat()))
+    // FIXME: here isn't accept true-colour flag.
+    // PixelFormats may be equal, if isn't.
+    if (pxFormat.isEqualTo(&m_frameBuffer.getPixelFormat())) {
       return false;
+    }
     if (m_frameBuffer.getBuffer() != 0)
       setFbProperties(&m_frameBuffer.getDimension(), &pxFormat);
   }
@@ -655,8 +663,20 @@ void RemoteViewerCore::initTunnelling()
   m_logWriter.detail(_T("Initialization of tight-tunneling..."));
   UINT32 tunnelCount = m_input->readUInt32();
   if (tunnelCount > 0) {
-    m_logWriter.error(_T("Viewer not support tunneling in tight-authentication"));
-    throw Exception(_T("Viewer not support tunneling in tight-authentication"));
+    bool hasNoTunnel = false;
+    for (UINT32 i = 0; i < tunnelCount; i++) {
+      RfbCapabilityInfo cap = readCapability();
+      if (cap.code == TunnelDefs::NOTUNNEL) {
+        hasNoTunnel = true;
+      }
+    }
+    if (hasNoTunnel) {
+      m_output->writeUInt32(TunnelDefs::NOTUNNEL);
+      m_output->flush();
+    } else {
+      m_logWriter.error(_T("Viewer support only default tunneling tight-authentication"));
+      throw Exception(_T("Viewer support only default tunneling tight-authentication"));
+    }
   }
   m_logWriter.debug(_T("Tunneling is init"));
 }
@@ -839,7 +859,7 @@ void RemoteViewerCore::execute()
       m_logWriter.error(_T("Unknown error in CoreEventsAdapter::onDisconnect()"));
     }
 
-  } catch (AuthException &ex) {
+  } catch (const AuthException &ex) {
     m_logWriter.message(_T("RemoteVewerCore. Auth exception: %s"), ex.getMessage());
     try {
       m_adapter->onAuthError(&ex);
@@ -848,7 +868,7 @@ void RemoteViewerCore::execute()
     } catch (...) {
       m_logWriter.error(_T("Unknown error in CoreEventsAdapter::onAuthError()"));
     }
-  } catch (IOException &ex) {
+  } catch (const IOException &ex) {
     try {
       StringStorage disconnectMessage(ex.getMessage());
       m_adapter->onDisconnect(&disconnectMessage);
@@ -857,7 +877,7 @@ void RemoteViewerCore::execute()
     } catch (...) {
       m_logWriter.error(_T("Unknown error in CoreEventsAdapter::onDisconnect()"));
     }
-  } catch (Exception &ex) {
+  } catch (const Exception &ex) {
     m_logWriter.message(_T("RemoteViewerCore. Exception: %s"), ex.getMessage());
     try {
       m_adapter->onError(&ex);
@@ -1116,7 +1136,9 @@ void RemoteViewerCore::handshake()
   m_isTight = false;
 
   m_logWriter.info(_T("Server sent protocol version: %s"), getProtocolString().getString());
-  if (!isRfbProtocolString(serverProtocol) || m_major != 3 || m_minor < 3) {
+  if (!isRfbProtocolString(serverProtocol) || 
+      m_major < 3 ||
+      (m_major == 3 && m_minor < 3)) {
     StringStorage error;
     AnsiStringStorage protocolAnsi(serverProtocol);
     StringStorage protocol;
@@ -1126,12 +1148,18 @@ void RemoteViewerCore::handshake()
     throw Exception(error.getString());
   }
 
-  // select minor version:
-  if (m_minor < 7) {
-    m_minor = 3;
-  }
-  if (m_minor >= 8) {
-   m_minor = 8;
+  // if version is 4.0 or later, then set version 3.8.
+  if (m_major > 3) {
+    m_major = 3;
+    m_minor = 8;
+  } else { // else set version from list 3.3, 3.7, 3.8.
+    // select minor version:
+    if (m_minor < 7) {
+      m_minor = 3;
+    }
+    if (m_minor >= 8) {
+     m_minor = 8;
+    }
   }
 
   m_logWriter.info(_T("Send to server protocol version: %s"), getProtocolString().getString());
@@ -1174,7 +1202,13 @@ void RemoteViewerCore::clientAndServerInit()
     setFbProperties(&screenDimension, &serverPixelFormat);
   }
 
-  m_input->readUTF8(&m_remoteDesktopName);
+  UINT32 sizeInBytes = m_input->readUInt32();
+  std::vector<const char> buffer(sizeInBytes + 1);
+  m_input->read(&buffer.front(), sizeInBytes);
+  buffer[sizeInBytes] = '\0';
+  AnsiStringStorage ansiStr;
+  ansiStr.setString(&buffer[0]);
+  ansiStr.toStringStorage(&m_remoteDesktopName);
   m_logWriter.info(_T("Server remote name: %s"), m_remoteDesktopName.getString());
 
   if (m_isTight) {

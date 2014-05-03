@@ -24,14 +24,21 @@
 
 #include "ConfigurationDialog.h"
 #include "NamingDefs.h"
+#include "TvnViewer.h"
 #include "resource.h"
 
 #include "file-lib/File.h"
 #include "win-system/Process.h"
 
 ConfigurationDialog::ConfigurationDialog()
-: BaseDialog(IDD_CONFIGURATION)
+: BaseDialog(IDD_CONFIGURATION),
+  m_application(0)
 {
+}
+
+void ConfigurationDialog::setListenerOfUpdate(WindowsApplication *application)
+{
+  m_application = application;
 }
 
 BOOL ConfigurationDialog::onCommand(UINT controlID, UINT notificationID)
@@ -43,6 +50,9 @@ BOOL ConfigurationDialog::onCommand(UINT controlID, UINT notificationID)
   }
   if (controlID == IDOK) {
     onOkPressed();
+    if (m_application != 0) {
+      m_application->postMessage(TvnViewer::WM_USER_CONFIGURATION_RELOAD);
+    }
     kill(1);
     return TRUE;
   }

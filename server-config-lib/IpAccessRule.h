@@ -26,15 +26,13 @@
 #define _IP_ACCESS_RULE_H_
 
 #include "util/StringStorage.h"
-#include "thread/AutoLock.h"
-#include "thread/LocalMutex.h"
 
 //
 // Class contains information about
 // host access (allow, deny hosts etc).
 //
 
-class IpAccessRule : public Lockable
+class IpAccessRule
 {
 public:
 
@@ -52,14 +50,6 @@ public:
   IpAccessRule();
   virtual ~IpAccessRule();
 public:
-
-  virtual void lock() {
-    m_objectCS.lock();
-  }
-
-  virtual void unlock() {
-    m_objectCS.unlock();
-  }
 
   void toString(StringStorage *output) const;
 
@@ -130,12 +120,6 @@ protected:
 
   StringStorage m_firstIp;
   StringStorage m_lastIp;
-
-  //
-  // Critical section
-  //
-
-  LocalMutex m_objectCS;
 };
 
 #endif

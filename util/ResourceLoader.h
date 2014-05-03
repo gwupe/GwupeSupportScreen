@@ -81,7 +81,7 @@ public:
    * @param [in] id identifier of accelerator in resource file.
    * @return handle of cursor if it's loaded.
    */
-  HCURSOR loadStandartCursor(const TCHAR *id);
+  HCURSOR loadStandardCursor(const TCHAR *id);
   /**
    * Loads cursor from resources.
    * @param [in] id identifier of accelerator in resource file.

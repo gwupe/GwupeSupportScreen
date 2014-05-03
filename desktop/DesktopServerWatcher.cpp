@@ -69,9 +69,6 @@ DesktopServerWatcher::DesktopServerWatcher(ReconnectionListener *recListener, Lo
     if (m_sharedMem) delete m_sharedMem;
     throw;
   }
-
-  // Start thread execution.
-  resume();
 }
 
 DesktopServerWatcher::~DesktopServerWatcher()
@@ -139,6 +136,7 @@ void DesktopServerWatcher::execute()
       m_log->debug(_T("DesktopServerWatcher::execute(): Destroyed otherSidePipeChanFrom"));
       otherSidePipeChanFrom = 0;
 
+      m_log->debug(_T("DesktopServerWatcher::execute(): Try to call onReconnect()"));
       m_recListener->onReconnect(ownSidePipeChanTo, ownSidePipeChanFrom);
 
       m_process->waitForExit();

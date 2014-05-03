@@ -58,6 +58,14 @@ public:
   // This function returns the view port rectangle.
   Rect getViewPortRect();
 
+  // Returns true if checked share only application.
+  bool getOnlyApplication();
+
+  // Returns a region that has rectangles of application which was visible
+  // window parts at latest calling of the update() function. The region
+  // doesn't changes by the update function if checked mode isn't "shareapp".
+  void getApplicationRegion(Region *region);
+
   // Assignes self values by an external state.
   void changeState(const ViewPortState *newState);
 
@@ -76,6 +84,7 @@ private:
 
   ViewPortState m_state;
   Rect m_rect;
+  Region m_appRegion;
   LocalMutex m_stateMutex;
 
   DateTime m_latestHwndResolvingTime;

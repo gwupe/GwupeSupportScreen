@@ -22,11 +22,11 @@
 //-------------------------------------------------------------------------
 //
 
-#include <vector>
-
 #include "ZrleDecoder.h"
 
-typedef vector<unsigned int> Palette;
+#include "io-lib/ByteArrayInputStream.h"
+
+#include <vector>
 
 ZrleDecoder::ZrleDecoder(LogWriter *logWriter)
 : DecoderOfRectangle(logWriter)
@@ -43,10 +43,10 @@ void ZrleDecoder::decode(RfbInputGate *input,
                          const Rect *dstRect)
 {
   size_t maxUnpackedSize = getMaxSizeOfRectangle(dstRect);
-  inflate(input, maxUnpackedSize);
+  readAndInflate(input, maxUnpackedSize);
 
-  size_t outputSize = m_inflater.getOutputSize();
-  if (outputSize == 0) {
+  size_t unpackedDataSize = m_inflater.getOutputSize();
+  if (unpackedDataSize == 0) {
     m_logWriter->debug(_T("Empty unpacked data (zrle-decoder)"));
     if (dstRect->area() != 0) {
       m_logWriter->detail(_T("Corrupted data in zrle-decoder, rectangle is undefined."));
@@ -54,80 +54,84 @@ void ZrleDecoder::decode(RfbInputGate *input,
     }
     return;
   }
-  vector<unsigned char> out;
-  out.resize(outputSize);
-  out.assign(m_inflater.getOutput(), m_inflater.getOutput() + outputSize);
-  size_t readed = 0;
 
-  m_bytesPerPixel = frameBuffer->getBytesPerPixel();
+  vector<unsigned char> unpackedData;
+  unpackedData.resize(unpackedDataSize);
+  unpackedData.assign(m_inflater.getOutput(), m_inflater.getOutput() + unpackedDataSize);
+  ByteArrayInputStream unpackedByteArrayStream(reinterpret_cast<char *>(&unpackedData.front()),
+                                               unpackedData.size());
+  DataInputStream unpackedDataStream(&unpackedByteArrayStream);
+
   m_numberFirstByte = 0;
-
-  // FIXME: test this code.
   PixelFormat pxFormat = frameBuffer->getPixelFormat();
-  if (pxFormat.bitsPerPixel == 32 && pxFormat.colorDepth <= 24) {
-    UINT32 colorMaxValue = pxFormat.blueMax  << pxFormat.blueShift  |
-                           pxFormat.greenMax << pxFormat.greenShift |
-                           pxFormat.redMax   << pxFormat.redShift;
-    bool bytesIsUnUse[4] = {0, 0, 0, 0};
-    for (int i = 0; i < 4; i++) {
-      bytesIsUnUse[i] = (colorMaxValue & 0xFF) == 0;
-      colorMaxValue >>= 8;
-    }
-    if (bytesIsUnUse[3]) {
+
+  if (pxFormat.bitsPerPixel == 8) {
+    m_bytesPerPixel = 1;
+  } else if (pxFormat.bitsPerPixel == 16) {
+    m_bytesPerPixel = 2;
+  } else if (pxFormat.bitsPerPixel == 32) {
+    UINT32 colorMaxValue =  pxFormat.blueMax  << pxFormat.blueShift  |
+                            pxFormat.greenMax << pxFormat.greenShift |
+                            pxFormat.redMax   << pxFormat.redShift;
+    //for CPIXELS
+    if ((colorMaxValue & (0xFF000000))==0) {
       m_bytesPerPixel = 3;
       m_numberFirstByte = 0;
-    } else if (bytesIsUnUse[0]) {
+    } else if ((colorMaxValue & 0xFF)==0) {
       m_bytesPerPixel = 3;
       m_numberFirstByte = 1;
+    } else /*for other cases*/{
+      m_bytesPerPixel = 4;
+      m_numberFirstByte = 0;
     }
   }
-  for (int y = dstRect->top; y < dstRect->bottom; y += TILE_SIZE) 
+
+  for (int y = dstRect->top; y < dstRect->bottom; y += TILE_SIZE) {
     for (int x = dstRect->left; x < dstRect->right; x += TILE_SIZE) {
       Rect tileRect(x, y, 
                     min(x + TILE_SIZE, dstRect->right),
                     min(y + TILE_SIZE, dstRect->bottom));
 
-      if (!frameBuffer->getDimension().getRect().intersection(&tileRect).isEqualTo(&tileRect))
+      if (!frameBuffer->getDimension().getRect().intersection(&tileRect).isEqualTo(&tileRect)) {
         throw Exception(_T("Error in protocol: incorrect size of tile (zrle-decoder)"));
+      }
       size_t tileLength = tileRect.area();
       size_t tileBytesLength = tileLength * m_bytesPerPixel;
       vector<char> pixels;
       pixels.resize(tileBytesLength);
 
-      int type = readType(out, &readed);
+      int type = readType(&unpackedDataStream);
 
-      // raw pixel data
-      if (type == 0)
-        readRawTile(out, &readed, pixels, &tileRect);
-
-      // a solid tile consisting of a single colour
-      if (type == 1)
-        readSolidTile(out, &readed, pixels, &tileRect);
-
-      // packed palette
-      if (type >= 2 && type <= 16)
-        readPackedPaletteTile(out, &readed, pixels, &tileRect, type);
-
-      // plain rle
-      if (type == 128)
-        readPlainRleTile(out, &readed, pixels, &tileRect);
-
-      // palette rle
-      if (type >= 130 && type <= 255) 
-        readPaletteRleTile(out, &readed, pixels, &tileRect, type);
-
-      // unused types
-      if (type >= 17 && type <= 127 || type == 129) {
+      if (type == 0) {
+        // raw pixel data
+        readRawTile(&unpackedDataStream, pixels, &tileRect);
+      } else if (type == 1) {
+        // a solid tile consisting of a single colour
+        readSolidTile(&unpackedDataStream, pixels, &tileRect);
+      } else if (type >= 2 && type <= 16) {
+        // packed palette
+        readPackedPaletteTile(&unpackedDataStream, pixels, &tileRect, type);
+      } else if (type >= 17 && type <= 127) {
+        // unused (no advantage over palette RLE)
+      } if (type == 128) {
+        // plain rle
+        readPlainRleTile(&unpackedDataStream, pixels, &tileRect);
+      } if (type == 129) {
+        // invalid type
         StringStorage error;
         error.format(_T("Error: subencoding %d of Zrle encoding is unused"), type);
         throw Exception(error.getString());
+      } if (type >= 130 && type <= 255) {
+        // palette rle
+        readPaletteRleTile(&unpackedDataStream, pixels, &tileRect, type);
       }
 
       drawTile(frameBuffer, &tileRect, &pixels);
     } // tile(x, y)
+  } // tile(..., y)
 }
 
-void ZrleDecoder::inflate(RfbInputGate *input, size_t unpackedSize)
+void ZrleDecoder::readAndInflate(RfbInputGate *input, size_t maximalUnpackedSize)
 {
   UINT32 length = input->readUInt32();
   std::vector<char> zlibData;
@@ -138,8 +142,7 @@ void ZrleDecoder::inflate(RfbInputGate *input, size_t unpackedSize)
   input->readFully(&zlibData.front(), length);
 
   m_inflater.setInput(&zlibData.front(), length);
-
-  m_inflater.setUnpackedSize(unpackedSize);
+  m_inflater.setUnpackedSize(maximalUnpackedSize);
   m_inflater.inflate();
 }
 
@@ -151,74 +154,60 @@ size_t ZrleDecoder::getMaxSizeOfRectangle(const Rect *dstRect)
   return TILE_LENGTH_SIZE + MAXIMAL_TILE_SIZE * tileCount;
 }
 
-int ZrleDecoder::readType(const vector<unsigned char> &out,
-                          size_t *const readed)
+int ZrleDecoder::readType(DataInputStream *input)
 {
-  if (*readed >= out.size())
-    throw Exception(_T("error in read type (zrle-decoder): out of input-buffer"));
-  int type = out[*readed];
-  (*readed)++;
+  int type = input->readUInt8();
   return type;
 }
 
-size_t ZrleDecoder::readRunLength(const vector<unsigned char> &out,
-                                  size_t *const readed)
+size_t ZrleDecoder::readRunLength(DataInputStream *input)
 {
   size_t runLength = 0;
-  size_t delta;
+  UINT8 delta;
   do {
-    if (*readed >= out.size())
-      throw Exception(_T("error in read-run-lenght (zrle-decoder): out of input-buffer"));
-    delta = out[*readed];
-    (*readed)++;
+    delta = input->readUInt8();
     runLength += delta;
   } while (delta == 255); // if value == 255 then continue reading run-length
   return runLength + 1; // the length is one more than the sum
- }
-
-Palette ZrleDecoder::readPalette(const vector<unsigned char> &out,
-                                 size_t *const readed,
-                                 const int paletteSize)
-{
-  Palette palette(paletteSize);
-  for (int i = 0; i < paletteSize; i++) {
-    if (*readed + m_bytesPerPixel > out.size())
-      throw Exception(_T("error in read palette (zrle-decoder): out of input-buffer"));
-    memcpy(&palette[i] + m_numberFirstByte, &out[*readed], m_bytesPerPixel);
-    *readed += m_bytesPerPixel;
-  }
-  return palette;
 }
 
-void ZrleDecoder::readRawTile(const vector<unsigned char> &out,
-                                size_t *const readed,
-                                vector<char> &pixels,
-                                const Rect *tileRect)
+void ZrleDecoder::readPalette(DataInputStream *input,
+                              const int paletteSize,
+                              Palette *palette)
+{
+  palette->resize(paletteSize);
+
+  for (int i = 0; i < paletteSize; i++) {
+    input->readFully(&(*palette)[i] + m_numberFirstByte, m_bytesPerPixel);
+  }
+}
+
+void ZrleDecoder::readRawTile(DataInputStream *input,
+                              vector<char> &pixels,
+                              const Rect *tileRect)
 {
   size_t tileBytesLength = tileRect->area() * m_bytesPerPixel;
-  if (*readed + tileBytesLength > out.size())
-    throw Exception(_T("error in read raw-tile (zrle-decoder): out of input-buffer"));
-  memcpy(&pixels.front(), &out[*readed], tileBytesLength);
-  *readed += tileBytesLength;
+  input->readFully(&pixels.front(), tileBytesLength);
 }
 
-void ZrleDecoder::readSolidTile(const vector<unsigned char> &out,
-                                size_t *const readed,
+void ZrleDecoder::readSolidTile(DataInputStream *input,
                                 vector<char> &pixels,
                                 const Rect *tileRect)
 {
   size_t tileLength = tileRect->area();
   char solid[4] = {0, 0, 0, 0};
-  if (*readed + m_bytesPerPixel > out.size())
-    throw Exception(_T("error in solid-tile (zrle-decoder): out of input-buffer"));
-  memcpy(solid + m_numberFirstByte, &out[*readed], m_bytesPerPixel);
-  *readed += m_bytesPerPixel;
-  for (size_t i = 0; i < tileLength; i++)
-    memcpy(&pixels[i * m_bytesPerPixel], solid, m_bytesPerPixel);
+
+  input->readFully(solid + m_numberFirstByte, m_bytesPerPixel);
+  
+  char *pixelsPtr = &pixels.front();
+  // TODO: Can we optimize this?
+  for (size_t i = 0; i < tileLength; i++) {
+    memcpy(pixelsPtr + m_numberFirstByte, solid, m_bytesPerPixel); 
+    pixelsPtr += m_bytesPerPixel;
+  }
 }
 
-void ZrleDecoder::readPackedPaletteTile(const vector<unsigned char> &out,
-                                        size_t *const readed,
+void ZrleDecoder::readPackedPaletteTile(DataInputStream *input,
                                         vector<char> &pixels,
                                         const Rect *tileRect,
                                         const int type)
@@ -228,8 +217,9 @@ void ZrleDecoder::readPackedPaletteTile(const vector<unsigned char> &out,
 
   // type and palette size is equal
   int paletteSize = type;
-  Palette palette = readPalette(out, readed, paletteSize);
-  
+  Palette palette;
+  readPalette(input, paletteSize, &palette);
+
   int m = 0;
   unsigned char mask = 0;
   unsigned char deltaOffset = 0;
@@ -237,66 +227,64 @@ void ZrleDecoder::readPackedPaletteTile(const vector<unsigned char> &out,
     m = (width + 7) / 8;
     mask = 0x01;
     deltaOffset = 1;
-  }
-
-  if (paletteSize == 3 || paletteSize == 4) {
+  } else if (paletteSize == 3 || paletteSize == 4) {
     m = (width + 3) / 4;
     mask = 0x03;
     deltaOffset = 2;
-  }
-
-  if (paletteSize >= 5 && paletteSize <= 16) {
+  } else if (paletteSize >= 5 && paletteSize <= 16) {
     m = (width + 1) / 2;
     mask = 0x0F;
     deltaOffset = 4;
   }
 
   for (int y = 0; y < height; y++) {
-    if (m == 0 || *readed + m > out.size())
-      throw Exception(_T("error in packed-palette-tile (zrle-decoder): out of input-buffer"));
     // bit lenght of UINT8
     unsigned char offset = 8;
     int index = 0;
+    // FIXME: optimization. Read by line.
+    int entryByIndex = input->readUInt8();
 
     for (int x = 0; x < width; x++) {
       offset -= deltaOffset;
-      int color = (out[*readed + index] >> offset) & mask;
+      int color = (entryByIndex >> offset) & mask;
       if (offset == 0) {
         offset = 8;
-        index++;
+        // Don't read next entry, if it's last pixel in tile.
+        if (x != width - 1) {
+          entryByIndex = input->readUInt8();
+        }
       }
 
       size_t count = y * width + x;
       memcpy(&pixels[count * m_bytesPerPixel], &palette[color], m_bytesPerPixel);
     }
-    *readed += m;
   }
 }
 
-void ZrleDecoder::readPlainRleTile(const vector<unsigned char> &out,
-                                   size_t *const readed,
+void ZrleDecoder::readPlainRleTile(DataInputStream *input,
                                    vector<char> &pixels,
                                    const Rect *tileRect)
 {
   size_t tileLength = tileRect->area();
-  for (size_t indexPixel = 0; indexPixel < tileLength;) {
+  for (size_t indexPixel = 0; indexPixel < tileLength * m_bytesPerPixel;) {
     char color[4] = {0, 0, 0, 0};
-    if (*readed + m_bytesPerPixel > out.size())
-      throw Exception(_T("error in plain-rre-tile in zrle-decoder: out of input-buffer"));
-    memcpy(color + m_numberFirstByte, &out[*readed], m_bytesPerPixel);
-    *readed += m_bytesPerPixel;
+    input->readFully(color + m_numberFirstByte, m_bytesPerPixel);
 
-    size_t runLength = readRunLength(out, readed);
-
+    size_t runLength = readRunLength(input);
+    // TODO: refactor this
     for(size_t i = 0; i < runLength; i++) {
-      memcpy(&pixels[(indexPixel + i) * m_bytesPerPixel], color, m_bytesPerPixel);
+      // FIXME: add check this condition in all similar areas.
+      if (indexPixel + m_bytesPerPixel <= pixels.size()) {
+        memcpy(&pixels[indexPixel], color, m_bytesPerPixel);
+      } else {
+        throw Exception(_T("Corrupt protocol in Zrle-decoder (plain rle tile)."));
+      }
+      indexPixel += m_bytesPerPixel; 
     }
-    indexPixel += runLength;
-  } 
+  }
 }
 
-void ZrleDecoder::readPaletteRleTile(const vector<unsigned char> &out,
-                                     size_t *const readed,
+void ZrleDecoder::readPaletteRleTile(DataInputStream *input,
                                      vector<char> &pixels,
                                      const Rect *tileRect,
                                      const int type)
@@ -304,48 +292,49 @@ void ZrleDecoder::readPaletteRleTile(const vector<unsigned char> &out,
   size_t tileLength = tileRect->area();
 
   int paletteSize = type - 128;
-  Palette palette = readPalette(out, readed, paletteSize);
+  Palette palette;
+  readPalette(input, paletteSize, &palette);
 
   for (size_t indexPixel = 0; indexPixel < tileLength;) {
-    unsigned char color;
-    if (*readed >= out.size())
-      throw Exception(_T("error in palette-rre-tile in zrle-decoder: out of input-buffer"));
-    color = out[*readed];
-    (*readed)++;
+    UINT8 color = input->readUInt8();
 
     size_t runLength = 1;
     if (color >= 128) {
       color -= 128;
-      runLength = readRunLength(out, readed);
+      runLength = readRunLength(input);
     }
-
-    for(size_t i = 0; i < runLength; i++)
-      memcpy(&pixels[(indexPixel + i) * m_bytesPerPixel], &palette[color], m_bytesPerPixel);
-
+    
+    char * pixelsPtr = &pixels[indexPixel * m_bytesPerPixel];
+    for(size_t i = 0; i < runLength; i++) {
+      memcpy(pixelsPtr, &palette[color], m_bytesPerPixel);
+      pixelsPtr += m_bytesPerPixel;
+    }
     indexPixel += runLength;
   }
-}        
+}
 
 void ZrleDecoder::drawTile(FrameBuffer *fb,
                            const Rect *tileRect,
                            const vector<char> *pixels)
 {
   int width = tileRect->getWidth();
-  int height = tileRect->getHeight();
   size_t fbBytesPerPixel = m_bytesPerPixel;
-  if (fbBytesPerPixel == 3)
-    fbBytesPerPixel++;
+
+  if (fbBytesPerPixel == 3) {
+    fbBytesPerPixel = 4;
+  }
 
   int tileLength = tileRect->area();
 
   int x = tileRect->left;
   int y = tileRect->top;
+   
+  const char *pixelsPtr = &pixels->front();
+  char *bufferPtr = 0;
   for (int i = 0; i < tileLength; i++) {
-    void *pixelPtr = fb->getBufferPtr(x + i % width, y + i / width);
-
-    memset(pixelPtr, 0, fbBytesPerPixel);
-    memcpy(pixelPtr,
-           &pixels->operator[](i * m_bytesPerPixel),
-           m_bytesPerPixel);
+    bufferPtr = (char*)fb->getBufferPtr(x + i % width, y + i / width);
+    memset(bufferPtr, 0, fbBytesPerPixel);
+    memcpy(bufferPtr, pixelsPtr, m_bytesPerPixel);
+    pixelsPtr+=m_bytesPerPixel;
   }
 }

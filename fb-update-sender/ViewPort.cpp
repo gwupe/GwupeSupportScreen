@@ -60,6 +60,10 @@ void ViewPort::update(const Dimension *fbDimension)
 
   Rect rect;
   switch(m_state.m_mode) {
+  case ViewPortState::APPLICATION:
+    _ASSERT(m_desktop != 0);
+    m_desktop->getApplicationRegion(m_state.m_processId, &m_appRegion);
+    // Also, the view port rectangle will be FULL_DESKTOP.
   case ViewPortState::FULL_DESKTOP:
     rect.setRect(&fbDimension->getRect());
     break;
@@ -120,4 +124,14 @@ void ViewPort::resolveWindowName()
     }
     m_latestHwndResolvingTime = DateTime::now();
   }
+}
+
+bool ViewPort::getOnlyApplication()
+{
+  return m_state.m_mode == ViewPortState::APPLICATION;
+}
+
+void ViewPort::getApplicationRegion(Region *region)
+{
+  *region = m_appRegion;
 }

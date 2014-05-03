@@ -104,7 +104,6 @@ protected:
   virtual void onCheckAccessControl(RfbClient *client) throw(AuthException);
   virtual void onClipboardUpdate(const StringStorage *newClipboard);
   virtual void onSendUpdate(const UpdateContainer *updateContainer,
-                            const FrameBuffer *frameBuffer,
                             const CursorShape *cursorShape);
   virtual bool isReadyToSend();
   // If an error occured RfbClientManager closes all current connections

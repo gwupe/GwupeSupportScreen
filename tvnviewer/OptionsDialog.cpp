@@ -299,9 +299,7 @@ void OptionsDialog::onPreferredEncodingSelectionChange()
     enableCustomCompression(m_compLvl.isChecked());
     m_compLvl.setEnabled(true);
     break;
-  case EncodingDefs::RRE:
-  case EncodingDefs::RAW:
-  case EncodingDefs::HEXTILE:
+  default:
     enableCustomCompression(false);
     m_compLvl.setEnabled(false);
     break;

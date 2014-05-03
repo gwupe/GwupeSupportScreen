@@ -104,6 +104,7 @@ protected:
   static const UINT8 WINDOW_COORDS_REQ = 36;
   static const UINT8 WINDOW_HANDLE_REQ = 37;
   static const UINT8 DISPLAY_NUMBER_COORDS_REQ = 38;
+  static const UINT8 APPLICATION_REGION_REQ = 39;
   static const UINT8 NORMALIZE_RECT_REQ = 40;
 
   static const UINT8 CONFIG_RELOAD_REQ = 50;

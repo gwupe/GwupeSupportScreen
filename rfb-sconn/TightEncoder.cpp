@@ -67,12 +67,13 @@ void TightEncoder::splitRectangle(const Rect *rect,
   if (maxWidth > rectWidth) {
     maxWidth = rectWidth;
   }
+  
   int maxHeight = maxSize / maxWidth;
 
   for (int y0 = rect->top; y0 < rect->bottom; y0 += maxHeight) {
-    int y1 = (y0 + maxHeight <= rect->bottom) ? y0 + maxHeight : rect->bottom;
+    int y1 = min(y0 + maxHeight, rect->bottom);
     for (int x0 = rect->left; x0 < rect->right; x0 += maxWidth) {
-      int x1 = (x0 + maxWidth <= rect->right) ? x0 + maxWidth : rect->right;
+      int x1 = min(x0 + maxWidth, rect->right);
       rectList->push_back(Rect(x0, y0, x1, y1));
     }
   }
@@ -350,16 +351,28 @@ void TightEncoder::fillPalette(const Rect *r, const FrameBuffer *fb, int maxColo
   // Shortcuts.
   const PIXEL_T *pixels = (const PIXEL_T *)fb->getBuffer();
   int stride = fb->getDimension().width;
+  UINT32 pixel = pixels[r->top * stride + r->left];
+  UINT32 oldPixel = 0;
+  UINT32 runLength = 0;
 
-  // FIXME: Optimize!
   for (int y = r->top; y < r->bottom; y++) {
     for (int x = r->left; x < r->right; x++) {
-      UINT32 pixel = pixels[y * stride + x];
-      if (m_pal.insert(pixel, 1) == 0) {
-        return;
+      pixel = pixels[y * stride + x];
+
+      if (oldPixel != pixel) {
+        if (m_pal.insert(oldPixel, runLength) == 0) {
+          return;
+        }
+        oldPixel = pixel;
+        runLength = 1;
+      } else {
+        runLength++;
       }
     }
   }
+  if (m_pal.insert(oldPixel, runLength) == 0) {
+			return;
+	}
 }
 
 template <class PIXEL_T>
@@ -438,12 +451,16 @@ void TightEncoder::encodeIndexedRect(const Rect *rect, const FrameBuffer *fb,
   const int h = rect->getHeight();
   const int skipPixels = fb->getDimension().width - w;
 
-  // FIXME: Optimize by minimizing calls to TightPalette::getIndex().
-  //        Call it once for series of the same color.
+  UINT8 index = m_pal.getIndex(*src);
+  PIXEL_T oldColor = 0;
   for (int y = 0; y < h; y++) {
     for (int x = 0; x < w; x++) {
-      PIXEL_T rgb = *src++;
-      out->writeUInt8(m_pal.getIndex(rgb));
+      if (oldColor != *src) {
+        index = m_pal.getIndex(*src);
+        oldColor = *src;
+      }
+      *src++;
+      out->writeUInt8(index);
     }
     src += skipPixels;
   }
@@ -516,7 +533,7 @@ void TightEncoder::sendCompactLength(size_t dataLen)
 {
   _ASSERT(dataLen <= 0x3FFFFF);
 
-  char buffer[4];
+  UINT8 buffer[4];
   size_t numBytes = 0;
 
   buffer[numBytes++] = dataLen & 0x7F;

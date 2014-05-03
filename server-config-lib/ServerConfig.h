@@ -97,6 +97,9 @@ public:
   bool isControlAuthEnabled();
   void useControlAuth(bool useAuth);
 
+  bool getControlAuthAlwaysChecking();
+  void setControlAuthAlwaysChecking(bool value);
+
   void setRfbPort(int port);
   int getRfbPort();
 
@@ -142,10 +145,6 @@ public:
   void deletePrimaryPassword();
   void deleteReadOnlyPassword();
   void deleteControlPassword();
-
-  unsigned int getIdleTimeout();
-
-  void setIdleTimeout(unsigned int idleTimeout);
 
   //
   // Configurator from Administration tab
@@ -306,12 +305,6 @@ protected:
   unsigned char m_controlPassword[VNC_PASSWORD_SIZE];
 
   //
-  // TODO: Make saving/loading idleTimeout member
-  //
-
-  unsigned int m_idleTimeout;
-
-  //
   // Configurator from Administration tab
   //
 
@@ -320,6 +313,7 @@ protected:
   bool m_enableAppletParamInUrl;
   int m_logLevel;
   bool m_useControlAuth;
+  bool m_controlAuthAlwaysChecking;
 
   //
   // Sharing configuration

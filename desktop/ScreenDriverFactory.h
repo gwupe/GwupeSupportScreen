@@ -23,34 +23,22 @@
 //
 
 #ifndef __SCREENDRIVERFACTORY_H__
-#define __SSCREENDRIVERFACTORY_H__
+#define __SCREENDRIVERFACTORY_H__
 
-#include "StandardScreenDriver.h"
-#include "MirrorScreenDriver.h"
+#include "ScreenDriver.h"
+#include "UpdateKeeper.h"
+#include "UpdateListener.h"
 #include "log-writer/LogWriter.h"
 
 class ScreenDriverFactory
 {
 public:
-  ScreenDriverFactory();
-  virtual ~ScreenDriverFactory();
-  static ScreenDriver *createScreenDriver(UpdateKeeper *updateKeeper,
-                                          UpdateListener *updateListener,
-                                          FrameBuffer *fb,
-                                          LocalMutex *fbLocalMutex,
-                                          LogWriter *log);
+  virtual ScreenDriver *createScreenDriver(UpdateKeeper *updateKeeper,
+                                             UpdateListener *updateListener,
+                                             FrameBuffer *fb,
+                                             LocalMutex *fbLocalMutex,
+                                             LogWriter *log) = 0;
 private:
-  static ScreenDriver *createStandardScreenDriver(UpdateKeeper *updateKeeper,
-                                                  UpdateListener *updateListener,
-                                                  FrameBuffer *fb,
-                                                  LocalMutex *fbLocalMutex,
-                                                  LogWriter *log);
-  static ScreenDriver *createMirrorScreenDriver(UpdateKeeper *updateKeeper,
-                                                UpdateListener *updateListener,
-                                                LocalMutex *fbLocalMutex,
-                                                LogWriter *log);
-
-  static bool isMirrorDriverAllowed();
 };
 
 #endif // __SCREENDRIVERFACTORY_H__

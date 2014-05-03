@@ -31,6 +31,7 @@
 ServerConfig::ServerConfig()
 : m_rfbPort(5900), m_httpPort(5800),
   m_disconnectAction(DA_DO_NOTHING), m_logLevel(0), m_useControlAuth(false),
+  m_controlAuthAlwaysChecking(false),
   m_acceptRfbConnections(true), m_useAuthentication(true),
   m_onlyLoopbackConnections(false), m_acceptHttpConnections(true),
   m_enableAppletParamInUrl(true), m_enableFileTransfers(true),
@@ -69,12 +70,12 @@ void ServerConfig::serialize(DataOutputStream *output)
   output->writeFully(m_primaryPassword, VNC_PASSWORD_SIZE);
   output->writeFully(m_readonlyPassword, VNC_PASSWORD_SIZE);
   output->writeFully(m_controlPassword, VNC_PASSWORD_SIZE);
-  output->writeUInt32(m_idleTimeout);
   output->writeInt8(m_useAuthentication ? 1 : 0);
   output->writeInt8(m_onlyLoopbackConnections ? 1 : 0);
   output->writeInt8(m_enableAppletParamInUrl ? 1 : 0);
   output->writeInt32(m_logLevel);
   output->writeInt8(m_useControlAuth ? 1 : 0);
+  output->writeInt8(m_controlAuthAlwaysChecking ? 1 : 0);
   output->writeInt8(m_alwaysShared ? 1 : 0);
   output->writeInt8(m_neverShared ? 1 : 0);
   output->writeInt8(m_disconnectClients ? 1 : 0);
@@ -125,12 +126,12 @@ void ServerConfig::deserialize(DataInputStream *input)
   input->readFully(m_primaryPassword, VNC_PASSWORD_SIZE);
   input->readFully(m_readonlyPassword, VNC_PASSWORD_SIZE);
   input->readFully(m_controlPassword, VNC_PASSWORD_SIZE);
-  m_idleTimeout = input->readUInt32();
   m_useAuthentication = input->readInt8() == 1;
   m_onlyLoopbackConnections = input->readInt8() == 1;
   m_enableAppletParamInUrl = input->readInt8() == 1;
   m_logLevel = input->readInt32();
   m_useControlAuth = input->readInt8() == 1;
+  m_controlAuthAlwaysChecking = input->readInt8() != 0;
   m_alwaysShared = input->readInt8() == 1;
   m_neverShared = input->readInt8() == 1;
   m_disconnectClients = input->readInt8() == 1;
@@ -226,6 +227,20 @@ void ServerConfig::useControlAuth(bool useAuth)
   AutoLock l(&m_objectCS);
 
   m_useControlAuth = useAuth;
+}
+
+bool ServerConfig::getControlAuthAlwaysChecking()
+{
+  AutoLock l(&m_objectCS);
+
+  return m_controlAuthAlwaysChecking;
+}
+
+void ServerConfig::setControlAuthAlwaysChecking(bool value)
+{
+  AutoLock l(&m_objectCS);
+
+  m_controlAuthAlwaysChecking = value;
 }
 
 void ServerConfig::setRfbPort(int port)
@@ -412,18 +427,6 @@ void ServerConfig::deleteControlPassword()
   AutoLock lock(&m_objectCS);
 
   m_hasControlPassword = false;
-}
-
-unsigned int ServerConfig::getIdleTimeout()
-{
-  AutoLock lock(&m_objectCS);
-  return m_idleTimeout;
-}
-
-void ServerConfig::setIdleTimeout(unsigned int idleTimeout)
-{
-  AutoLock lock(&m_objectCS);
-  m_idleTimeout = idleTimeout;
 }
 
 bool ServerConfig::isUsingAuthentication()

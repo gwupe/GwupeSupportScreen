@@ -73,6 +73,7 @@ public:
 class AuthHandler
 {
 public:
+  AuthHandler(int authType);
   virtual ~AuthHandler();
 
   //
@@ -92,7 +93,7 @@ public:
   //
   virtual int getType() const;
 
-protected:
+private:
   int m_id;
 };
 

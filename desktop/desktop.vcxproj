@@ -122,6 +122,34 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoUnicode|Win32'">$(SolutionDir)$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoUnicode|x64'">$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoUnicode|x64'">$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='DebugNoUnicode|Win32'">$(ProgramFiles)\Windows Kits\8.0\bin\x86;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProgramFiles)\Windows Kits\8.0\bin\x86;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='ReleaseNoUnicode|Win32'">$(ProgramFiles)\Windows Kits\8.0\bin\x86;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProgramFiles)\Windows Kits\8.0\bin\x86;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='DebugNoUnicode|x64'">$(ProgramFiles)\Windows Kits\8.0\bin\x64;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProgramFiles)\Windows Kits\8.0\bin\x64;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='ReleaseNoUnicode|x64'">$(ProgramFiles)\Windows Kits\8.0\bin\x64;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProgramFiles)\Windows Kits\8.0\bin\x64;$(ExecutablePath)</ExecutablePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='DebugNoUnicode|x64'">$(ProgramFiles)\Windows Kits\8.0\Include\um;$(ProgramFiles)\Windows Kits\8.0\Include\shared;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProgramFiles)\Windows Kits\8.0\Include\um;$(ProgramFiles)\Windows Kits\8.0\Include\shared;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='ReleaseNoUnicode|x64'">$(ProgramFiles)\Windows Kits\8.0\Include\um;$(ProgramFiles)\Windows Kits\8.0\Include\shared;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProgramFiles)\Windows Kits\8.0\Include\um;$(ProgramFiles)\Windows Kits\8.0\Include\shared;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='DebugNoUnicode|Win32'">$(ProgramFiles)\Windows Kits\8.0\Include\um;$(ProgramFiles)\Windows Kits\8.0\Include\shared;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProgramFiles)\Windows Kits\8.0\Include\um;$(ProgramFiles)\Windows Kits\8.0\Include\shared;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='ReleaseNoUnicode|Win32'">$(ProgramFiles)\Windows Kits\8.0\Include\um;$(ProgramFiles)\Windows Kits\8.0\Include\shared;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProgramFiles)\Windows Kits\8.0\Include\um;$(ProgramFiles)\Windows Kits\8.0\Include\shared;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='DebugNoUnicode|Win32'">$(ProgramFiles)\Windows Kits\8.0\lib\win8\um\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProgramFiles)\Windows Kits\8.0\lib\win8\um\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='ReleaseNoUnicode|Win32'">$(ProgramFiles)\Windows Kits\8.0\lib\win8\um\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProgramFiles)\Windows Kits\8.0\lib\win8\um\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='DebugNoUnicode|x64'">$(ProgramFiles)\Windows Kits\8.0\lib\win8\um\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProgramFiles)\Windows Kits\8.0\lib\win8\um\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='ReleaseNoUnicode|x64'">$(ProgramFiles)\Windows Kits\8.0\lib\win8\um\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProgramFiles)\Windows Kits\8.0\lib\win8\um\x64;$(LibraryPath)</LibraryPath>
+    <ExcludePath Condition="'$(Configuration)|$(Platform)'=='DebugNoUnicode|x64'"> $(ProgramFiles)\Windows Kits\8.0\Include\um;$(ProgramFiles)\Windows Kits\8.0\Include\shared;$(ExcludePath)</ExcludePath>
+    <ExcludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"> $(ProgramFiles)\Windows Kits\8.0\Include\um;$(ProgramFiles)\Windows Kits\8.0\Include\shared;$(ExcludePath)</ExcludePath>
+    <ExcludePath Condition="'$(Configuration)|$(Platform)'=='ReleaseNoUnicode|x64'"> $(ProgramFiles)\Windows Kits\8.0\Include\um;$(ProgramFiles)\Windows Kits\8.0\Include\shared;$(ExcludePath)</ExcludePath>
+    <ExcludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'"> $(ProgramFiles)\Windows Kits\8.0\Include\um;$(ProgramFiles)\Windows Kits\8.0\Include\shared;$(ExcludePath)</ExcludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -136,6 +164,9 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
+    <Lib>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
@@ -153,6 +184,9 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
+    <Lib>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -168,6 +202,9 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
+    <Lib>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -186,6 +223,9 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
+    <Lib>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugNoUnicode|Win32'">
     <ClCompile>
@@ -200,6 +240,9 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
+    <Lib>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugNoUnicode|x64'">
     <Midl>
@@ -217,6 +260,9 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
+    <Lib>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoUnicode|Win32'">
     <ClCompile>
@@ -232,6 +278,9 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
+    <Lib>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoUnicode|x64'">
     <Midl>
@@ -250,6 +299,9 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
+    <Lib>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ApplicationDesktopFactory.cpp" />
@@ -261,38 +313,59 @@
     <ClCompile Include="DesktopConfigLocal.cpp" />
     <ClCompile Include="DesktopServerWatcher.cpp" />
     <ClCompile Include="DesktopWinImpl.cpp" />
+    <ClCompile Include="Win8CursorShape.cpp" />
+    <ClCompile Include="Win8DeskDuplicationThread.cpp" />
+    <ClCompile Include="WinCursorShapeUtils.cpp" />
+    <ClCompile Include="WinDxCriticalException.cpp" />
+    <ClCompile Include="WinDxException.cpp" />
+    <ClCompile Include="WinDxgiAcquiredFrame.cpp" />
+    <ClCompile Include="WinDxgiOutput.cpp" />
+    <ClCompile Include="WinDxgiOutput1.cpp" />
+    <ClCompile Include="WinDxgiOutputDuplication.cpp" />
+    <ClCompile Include="WinDxRecoverableException.cpp" />
     <ClCompile Include="GrabOptimizator.cpp" />
     <ClCompile Include="HookInstaller.cpp" />
     <ClCompile Include="HooksUpdateDetector.cpp" />
     <ClCompile Include="HookUpdateTimer.cpp" />
     <ClCompile Include="InputBlocker.cpp" />
-    <ClCompile Include="LocalUpdateHandler.cpp" />
     <ClCompile Include="MirrorDriverClient.cpp" />
     <ClCompile Include="MirrorScreenDriver.cpp" />
-    <ClCompile Include="MouseDetector.cpp" />
-    <ClCompile Include="MouseGrabber.cpp" />
-    <ClCompile Include="MouseShapeDetector.cpp" />
+    <ClCompile Include="CursorPositionDetector.cpp" />
+    <ClCompile Include="CursorShapeGrabber.cpp" />
+    <ClCompile Include="CursorShapeDetector.cpp" />
     <ClCompile Include="Poller.cpp" />
     <ClCompile Include="SasUserInput.cpp" />
-    <ClCompile Include="ScreenDriver.cpp" />
-    <ClCompile Include="ScreenDriverFactory.cpp" />
     <ClCompile Include="ScreenGrabber.cpp" />
-    <ClCompile Include="StandardScreenDriver.cpp" />
     <ClCompile Include="UpdateContainer.cpp" />
     <ClCompile Include="UpdateDetector.cpp" />
     <ClCompile Include="UpdateFilter.cpp" />
     <ClCompile Include="UpdateHandler.cpp" />
+    <ClCompile Include="UpdateHandlerImpl.cpp" />
     <ClCompile Include="UpdateKeeper.cpp" />
     <ClCompile Include="UpdateListener.cpp" />
     <ClCompile Include="UpdateSendingListener.cpp" />
     <ClCompile Include="UserInput.cpp" />
     <ClCompile Include="WallpaperUtil.cpp" />
+    <ClCompile Include="Win32MirrorScreenDriver.cpp" />
+    <ClCompile Include="Win32ScreenDriver.cpp" />
+    <ClCompile Include="Win32ScreenDriverBaseImpl.cpp" />
+    <ClCompile Include="Win32ScreenDriverFactory.cpp" />
+    <ClCompile Include="Win8ScreenDriver.cpp" />
+    <ClCompile Include="Win8ScreenDriverImpl.cpp" />
+    <ClCompile Include="WinAutoMapDxgiSurface.cpp" />
+    <ClCompile Include="WinCustomD3D11Texture2D.cpp" />
     <ClCompile Include="WindowsClipboard.cpp" />
     <ClCompile Include="WindowsInputBlocker.cpp" />
-    <ClCompile Include="WindowsMouseGrabber.cpp" />
+    <ClCompile Include="WindowsCursorShapeGrabber.cpp" />
     <ClCompile Include="WindowsScreenGrabber.cpp" />
     <ClCompile Include="WindowsUserInput.cpp" />
+    <ClCompile Include="WinD3D11Device.cpp" />
+    <ClCompile Include="WinDxgiAdapter.cpp" />
+    <ClCompile Include="WinDxgiDevice.cpp" />
+    <ClCompile Include="WinDxgiSurface.cpp" />
+    <ClCompile Include="WinD3D11Texture2D.cpp" />
     <ClCompile Include="WinServiceDesktopFactory.cpp" />
+    <ClCompile Include="WinVideoRegionFounderImpl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbnormDeskTermListener.h" />
@@ -307,39 +380,62 @@
     <ClInclude Include="DesktopFactory.h" />
     <ClInclude Include="DesktopServerWatcher.h" />
     <ClInclude Include="DesktopWinImpl.h" />
+    <ClInclude Include="Win8CursorShape.h" />
+    <ClInclude Include="Win8DeskDuplicationThread.h" />
+    <ClInclude Include="Win8DuplicationListener.h" />
+    <ClInclude Include="WinCursorShapeUtils.h" />
+    <ClInclude Include="WinDxCriticalException.h" />
+    <ClInclude Include="WinDxException.h" />
+    <ClInclude Include="WinDxgiAcquiredFrame.h" />
+    <ClInclude Include="WinDxgiOutput.h" />
+    <ClInclude Include="WinDxgiOutput1.h" />
+    <ClInclude Include="WinDxgiOutputDuplication.h" />
+    <ClInclude Include="WinDxRecoverableException.h" />
     <ClInclude Include="GrabOptimizator.h" />
     <ClInclude Include="HookInstaller.h" />
     <ClInclude Include="HooksUpdateDetector.h" />
     <ClInclude Include="HookUpdateTimer.h" />
     <ClInclude Include="InputBlocker.h" />
-    <ClInclude Include="LocalUpdateHandler.h" />
     <ClInclude Include="MirrorDriverClient.h" />
     <ClInclude Include="MirrorScreenDriver.h" />
-    <ClInclude Include="MouseDetector.h" />
-    <ClInclude Include="MouseGrabber.h" />
-    <ClInclude Include="MouseShapeDetector.h" />
+    <ClInclude Include="CursorPositionDetector.h" />
+    <ClInclude Include="CursorShapeGrabber.h" />
+    <ClInclude Include="CursorShapeDetector.h" />
     <ClInclude Include="Poller.h" />
     <ClInclude Include="SasUserInput.h" />
     <ClInclude Include="ScreenDriver.h" />
     <ClInclude Include="ScreenDriverFactory.h" />
     <ClInclude Include="ScreenGrabber.h" />
-    <ClInclude Include="StandardScreenDriver.h" />
     <ClInclude Include="UpdateContainer.h" />
     <ClInclude Include="UpdateDetector.h" />
     <ClInclude Include="UpdateFilter.h" />
     <ClInclude Include="UpdateHandler.h" />
+    <ClInclude Include="UpdateHandlerImpl.h" />
     <ClInclude Include="UpdateKeeper.h" />
     <ClInclude Include="UpdateListener.h" />
     <ClInclude Include="UpdateSendingListener.h" />
     <ClInclude Include="UserInput.h" />
     <ClInclude Include="WallpaperUtil.h" />
-    <ClInclude Include="WinDesktop.h" />
+    <ClInclude Include="Win32MirrorScreenDriver.h" />
+    <ClInclude Include="Win32ScreenDriver.h" />
+    <ClInclude Include="Win32ScreenDriverBaseImpl.h" />
+    <ClInclude Include="Win32ScreenDriverFactory.h" />
+    <ClInclude Include="Win8ScreenDriver.h" />
+    <ClInclude Include="Win8ScreenDriverImpl.h" />
+    <ClInclude Include="WinAutoMapDxgiSurface.h" />
+    <ClInclude Include="WinCustomD3D11Texture2D.h" />
     <ClInclude Include="WindowsClipboard.h" />
     <ClInclude Include="WindowsInputBlocker.h" />
-    <ClInclude Include="WindowsMouseGrabber.h" />
+    <ClInclude Include="WindowsCursorShapeGrabber.h" />
     <ClInclude Include="WindowsScreenGrabber.h" />
     <ClInclude Include="WindowsUserInput.h" />
+    <ClInclude Include="WinD3D11Device.h" />
+    <ClInclude Include="WinDxgiAdapter.h" />
+    <ClInclude Include="WinDxgiDevice.h" />
+    <ClInclude Include="WinDxgiSurface.h" />
+    <ClInclude Include="WinD3D11Texture2D.h" />
     <ClInclude Include="WinServiceDesktopFactory.h" />
+    <ClInclude Include="WinVideoRegionFounderImpl.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

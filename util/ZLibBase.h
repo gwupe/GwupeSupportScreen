@@ -37,14 +37,17 @@ public:
   void setInput(const char *input, size_t size);
 
   const char *getOutput() const;
-  size_t getOutputSize() const;
+  unsigned long getOutputSize() const;
 
 protected:
   const char *m_input;
   size_t m_inputSize;
 
   std::vector<char> m_output;
-  size_t m_outputSize;
+
+  // Type of m_outputSize must be match with type m_zlibStream.total_out,
+  // otherwise may overflow long and value of m_outputSize will be too big.
+  unsigned long m_outputSize;
 };
 
 #endif

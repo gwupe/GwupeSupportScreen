@@ -187,14 +187,13 @@ void RfbClientManager::onClipboardUpdate(const StringStorage *newClipboard)
 }
 
 void RfbClientManager::onSendUpdate(const UpdateContainer *updateContainer,
-                                    const FrameBuffer *frameBuffer,
                                     const CursorShape *cursorShape)
 {
   AutoLock al(&m_clientListLocker);
   for (ClientListIter iter = m_clientList.begin();
        iter != m_clientList.end(); iter++) {
     if ((*iter)->getClientState() == IN_NORMAL_PHASE) {
-      (*iter)->sendUpdate(updateContainer, frameBuffer, cursorShape);
+      (*iter)->sendUpdate(updateContainer, cursorShape);
     }
   }
 }

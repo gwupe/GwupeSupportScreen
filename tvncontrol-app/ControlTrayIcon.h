@@ -144,7 +144,7 @@ protected:
   Command *m_updateRemoteConfigCommand;
   Command *m_updateLocalConfigCommand;
   MacroCommand *m_applyChangesMacroCommand;
-  Command *m_applyChangesControlCommand;
+  ControlCommand *m_applyChangesControlCommand;
 
   // This variable is set to true when entering ControlTrayIcon::windowProc(),
   // and is used to prevent from executing that function recursively.

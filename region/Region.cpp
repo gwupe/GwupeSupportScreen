@@ -110,6 +110,12 @@ bool Region::isEmpty() const
   return (miRegionNotEmpty((RegionPtr)&m_reg) == FALSE);
 }
 
+bool Region::isPointInside(int x, int y) const
+{
+  BoxRec stubBox; // Ignore returning rect.
+  return !!miPointInRegion((RegionPtr)&m_reg, x, y, &stubBox);
+}
+
 bool Region::equals(const Region *other) const
 {
   // Handle a special case when both regions are empty.

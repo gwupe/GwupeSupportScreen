@@ -588,15 +588,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\StandardPixelFormatFactory.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\TcpConnection.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\VncAuthentication.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\VncAuthenticationHandler.cpp"
 				>
 			</File>
 		</Filter>
@@ -670,15 +670,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\StandardPixelFormatFactory.h"
-				>
-			</File>
-			<File
 				RelativePath=".\TcpConnection.h"
 				>
 			</File>
 			<File
 				RelativePath=".\VncAuthentication.h"
+				>
+			</File>
+			<File
+				RelativePath=".\VncAuthenticationHandler.h"
 				>
 			</File>
 		</Filter>

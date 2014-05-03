@@ -127,6 +127,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="d3d11.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -553,6 +554,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CursorPositionDetector.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CursorShapeDetector.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CursorShapeGrabber.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\DesktopBaseImpl.cpp"
 				>
 			</File>
@@ -593,27 +606,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\LocalUpdateHandler.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\MirrorDriverClient.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\MirrorScreenDriver.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MouseDetector.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MouseGrabber.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MouseShapeDetector.cpp"
 				>
 			</File>
 			<File
@@ -625,19 +622,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ScreenDriver.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ScreenDriverFactory.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ScreenGrabber.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\StandardScreenDriver.cpp"
 				>
 			</File>
 			<File
@@ -654,6 +639,10 @@
 			</File>
 			<File
 				RelativePath=".\UpdateHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UpdateHandlerImpl.cpp"
 				>
 			</File>
 			<File
@@ -677,15 +666,67 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Win32MirrorScreenDriver.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Win32ScreenDriver.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Win32ScreenDriverBaseImpl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Win32ScreenDriverFactory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Win8CursorShape.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Win8DeskDuplicationThread.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Win8ScreenDriver.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Win8ScreenDriverImpl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinAutoMapDxgiSurface.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinCursorShapeUtils.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinCustomD3D11Texture2D.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinD3D11Device.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinD3D11Texture2D.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\WindowsClipboard.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\WindowsInputBlocker.cpp"
+				RelativePath=".\WindowsCursorShapeGrabber.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\WindowsMouseGrabber.cpp"
+				RelativePath=".\WindowsInputBlocker.cpp"
 				>
 			</File>
 			<File
@@ -697,7 +738,51 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WinDxCriticalException.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxException.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiAcquiredFrame.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiAdapter.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiDevice.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiOutput.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiOutput1.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiOutputDuplication.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiSurface.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxRecoverableException.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\WinServiceDesktopFactory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WinVideoRegionFounderImpl.cpp"
 				>
 			</File>
 		</Filter>
@@ -724,6 +809,18 @@
 			</File>
 			<File
 				RelativePath=".\CopyRectDetector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CursorPositionDetector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CursorShapeDetector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CursorShapeGrabber.h"
 				>
 			</File>
 			<File
@@ -779,27 +876,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\LocalUpdateHandler.h"
-				>
-			</File>
-			<File
 				RelativePath=".\MirrorDriverClient.h"
 				>
 			</File>
 			<File
 				RelativePath=".\MirrorScreenDriver.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MouseDetector.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MouseGrabber.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MouseShapeDetector.h"
 				>
 			</File>
 			<File
@@ -823,10 +904,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\StandardScreenDriver.h"
-				>
-			</File>
-			<File
 				RelativePath=".\UpdateContainer.h"
 				>
 			</File>
@@ -840,6 +917,10 @@
 			</File>
 			<File
 				RelativePath=".\UpdateHandler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UpdateHandlerImpl.h"
 				>
 			</File>
 			<File
@@ -863,15 +944,71 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Win32MirrorScreenDriver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Win32ScreenDriver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Win32ScreenDriverBaseImpl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Win32ScreenDriverFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Win8CursorShape.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Win8DeskDuplicationThread.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Win8DuplicationListener.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Win8ScreenDriver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Win8ScreenDriverImpl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinAutoMapDxgiSurface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinCursorShapeUtils.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinCustomD3D11Texture2D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinD3D11Device.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinD3D11Texture2D.h"
+				>
+			</File>
+			<File
 				RelativePath=".\WindowsClipboard.h"
 				>
 			</File>
 			<File
-				RelativePath=".\WindowsInputBlocker.h"
+				RelativePath=".\WindowsCursorShapeGrabber.h"
 				>
 			</File>
 			<File
-				RelativePath=".\WindowsMouseGrabber.h"
+				RelativePath=".\WindowsInputBlocker.h"
 				>
 			</File>
 			<File
@@ -883,7 +1020,51 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WinDxCriticalException.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxException.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiAcquiredFrame.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiAdapter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiDevice.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiOutput.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiOutput1.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiOutputDuplication.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxgiSurface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinDxRecoverableException.h"
+				>
+			</File>
+			<File
 				RelativePath=".\WinServiceDesktopFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WinVideoRegionFounderImpl.h"
 				>
 			</File>
 		</Filter>

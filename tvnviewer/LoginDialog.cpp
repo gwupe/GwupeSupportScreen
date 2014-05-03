@@ -141,7 +141,7 @@ void LoginDialog::openUrl(const TCHAR *url)
   // TODO: removed duplicated code (see AboutDialog.h)
   try {
     Shell::open(url, 0, 0);
-  } catch (SystemException &sysEx) {
+  } catch (const SystemException &sysEx) {
     StringStorage message;
 
     message.format(StringTable::getString(IDS_FAILED_TO_OPEN_URL_FORMAT), sysEx.getMessage());
@@ -170,7 +170,7 @@ void LoginDialog::onListening()
   m_connectionConfig.loadFromStorage(&ccsm);
 
   m_listening.setEnabled(false);
-  m_viewer->startListening(&m_connectionConfig, ViewerConfig::getInstance()->getListenPort());
+  m_viewer->startListening(ViewerConfig::getInstance()->getListenPort());
 }
 
 void LoginDialog::onAbout()

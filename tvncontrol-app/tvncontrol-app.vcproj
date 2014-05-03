@@ -581,10 +581,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ControlProto.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ControlProxy.cpp"
 				>
 			</File>
@@ -630,6 +626,10 @@
 			</File>
 			<File
 				RelativePath=".\SetPasswordsDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ShareAppCommand.cpp"
 				>
 			</File>
 			<File
@@ -784,6 +784,10 @@
 			</File>
 			<File
 				RelativePath=".\SetPasswordsDialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ShareAppCommand.h"
 				>
 			</File>
 			<File

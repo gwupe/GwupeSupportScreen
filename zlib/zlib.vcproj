@@ -293,11 +293,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\infblock.c"
+				RelativePath=".\gzlib.c"
 				>
 			</File>
 			<File
-				RelativePath=".\infcodes.c"
+				RelativePath=".\infback.c"
 				>
 			</File>
 			<File
@@ -310,10 +310,6 @@
 			</File>
 			<File
 				RelativePath=".\inftrees.c"
-				>
-			</File>
-			<File
-				RelativePath=".\infutil.c"
 				>
 			</File>
 			<File
@@ -335,15 +331,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\crc32.h"
+				>
+			</File>
+			<File
 				RelativePath=".\deflate.h"
 				>
 			</File>
 			<File
-				RelativePath=".\infblock.h"
-				>
-			</File>
-			<File
-				RelativePath=".\infcodes.h"
+				RelativePath=".\gzguts.h"
 				>
 			</File>
 			<File
@@ -355,11 +351,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inftrees.h"
+				RelativePath=".\inflate.h"
 				>
 			</File>
 			<File
-				RelativePath=".\infutil.h"
+				RelativePath=".\inftrees.h"
 				>
 			</File>
 			<File

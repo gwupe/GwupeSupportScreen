@@ -96,7 +96,7 @@
     <ClCompile Include="ViewerCollector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VncAuthenticationHandler.cpp">
+    <ClCompile Include="ViewerVncAuthHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -185,7 +185,7 @@
     <ClInclude Include="ViewerCollector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VncAuthenticationHandler.h">
+    <ClInclude Include="ViewerVncAuthHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

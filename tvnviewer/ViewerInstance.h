@@ -28,7 +28,7 @@
 #include "ViewerWindow.h"
 #include "network/socket/SocketIPv4.h"
 
-#include "VncAuthenticationHandler.h"
+#include "ViewerVncAuthHandler.h"
 
 class ViewerInstance
 {
@@ -60,7 +60,7 @@ protected:
 
   ViewerWindow m_viewerWnd;
   RemoteViewerCore m_viewerCore;
-  VncAuthenticationHandler m_vncAuthHandler;
+  ViewerVncAuthHandler m_vncAuthHandler;
   FileTransferCapability m_fileTransfer;
   SocketIPv4 *m_socket;
 };

@@ -152,7 +152,7 @@ void UserInputClient::getNormalizedRect(Rect *rect)
   do {
     try {
       // Send request
-      m_forwGate->writeUInt8(WINDOW_COORDS_REQ);
+      m_forwGate->writeUInt8(NORMALIZE_RECT_REQ);
       sendRect(rect, m_forwGate);
       *rect = readRect(m_forwGate);
       success = true;
@@ -202,4 +202,20 @@ HWND UserInputClient::getWindowHandleByName(const StringStorage *windowName)
     }
   } while (!success);
   return hwnd;
+}
+
+void UserInputClient::getApplicationRegion(unsigned int procId, Region *region)
+{
+  AutoLock al(m_forwGate);
+  bool success = false;
+  do {
+    try {
+      // Send request
+      m_forwGate->writeUInt8(APPLICATION_REGION_REQ);
+      m_forwGate->writeUInt32(procId);
+      readRegion(region, m_forwGate);
+      success = true;
+    } catch (ReconnectException &) {
+    }
+  } while (!success);
 }

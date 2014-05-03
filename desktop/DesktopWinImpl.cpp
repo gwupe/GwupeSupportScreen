@@ -25,7 +25,7 @@
 #include "DesktopWinImpl.h"
 #include "server-config-lib/Configurator.h"
 #include "desktop-ipc/UpdateHandlerClient.h"
-#include "LocalUpdateHandler.h"
+#include "UpdateHandlerImpl.h"
 #include "WindowsInputBlocker.h"
 #include "desktop-ipc/UserInputClient.h"
 #include "SasUserInput.h"
@@ -41,14 +41,15 @@ DesktopWinImpl::DesktopWinImpl(ClipboardListener *extClipListener,
 : DesktopBaseImpl(extClipListener, extUpdSendingListener, extDeskTermListener, log),
   m_wallPaper(0),
   m_deskConf(0),
-  m_log(log)
+  m_log(log),
+  m_scrDriverFactory(Configurator::getInstance()->getServerConfig())
 {
   m_log->info(_T("Creating DesktopWinImpl"));
 
   logDesktopInfo();
 
   try {
-    m_updateHandler = new LocalUpdateHandler(this, m_log);
+    m_updateHandler = new UpdateHandlerImpl(this, &m_scrDriverFactory, m_log);
     bool ctrlAltDelEnabled = false;
     m_userInput = new WindowsUserInput(this, ctrlAltDelEnabled, m_log);
     m_deskConf = new DesktopConfigLocal(m_log);

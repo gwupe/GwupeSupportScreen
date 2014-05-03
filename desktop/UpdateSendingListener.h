@@ -34,7 +34,6 @@ class UpdateSendingListener
 public:
   virtual ~UpdateSendingListener() {}
   virtual void onSendUpdate(const UpdateContainer *updateContainer,
-                            const FrameBuffer *frameBuffer,
                             const CursorShape *cursorShape) = 0;
   virtual bool isReadyToSend() = 0;
 };

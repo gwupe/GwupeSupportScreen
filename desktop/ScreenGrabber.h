@@ -67,6 +67,8 @@
 class ScreenGrabber
 {
 public:
+  // Derived constructors will ensure that the getScreenBuffer() returns
+  // a frame buffer with valid screen properties.
   ScreenGrabber(void);
   virtual ~ScreenGrabber(void);
 

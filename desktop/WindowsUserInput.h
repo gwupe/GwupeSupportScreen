@@ -52,6 +52,7 @@ public:
   virtual void getPrimaryDisplayCoords(Rect *rect);
   virtual void getWindowCoords(HWND hwnd, Rect *rect);
   virtual HWND getWindowHandleByName(const StringStorage *windowName);
+  virtual void getApplicationRegion(unsigned int procId, Region *region);
 
   virtual void initKeyFlag(UINT8 initValue) { m_prevKeyFlag = initValue; }
 

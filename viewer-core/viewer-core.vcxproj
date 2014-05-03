@@ -240,7 +240,6 @@
     <ClCompile Include="RfbPointerEventClientMessage.cpp" />
     <ClCompile Include="RfbSetEncodingsClientMessage.cpp" />
     <ClCompile Include="RfbSetPixelFormatClientMessage.cpp" />
-    <ClCompile Include="StandardPixelFormatFactory.cpp" />
     <ClCompile Include="TcpConnection.cpp" />
     <ClCompile Include="VncAuthentication.cpp" />
     <ClCompile Include="CompressionLevel.cpp" />
@@ -255,6 +254,7 @@
     <ClCompile Include="RichCursorDecoder.cpp" />
     <ClCompile Include="RreDecoder.cpp" />
     <ClCompile Include="TightDecoder.cpp" />
+    <ClCompile Include="VncAuthenticationHandler.cpp" />
     <ClCompile Include="ZrleDecoder.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -277,7 +277,6 @@
     <ClInclude Include="RfbPointerEventClientMessage.h" />
     <ClInclude Include="RfbSetEncodingsClientMessage.h" />
     <ClInclude Include="RfbSetPixelFormatClientMessage.h" />
-    <ClInclude Include="StandardPixelFormatFactory.h" />
     <ClInclude Include="TcpConnection.h" />
     <ClInclude Include="VncAuthentication.h" />
     <ClInclude Include="CompressionLevel.h" />
@@ -292,6 +291,7 @@
     <ClInclude Include="RichCursorDecoder.h" />
     <ClInclude Include="RreDecoder.h" />
     <ClInclude Include="TightDecoder.h" />
+    <ClInclude Include="VncAuthenticationHandler.h" />
     <ClInclude Include="ZrleDecoder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -30,10 +30,10 @@
 #include "desktop/WallpaperUtil.h"
 #include "thread/GuiThread.h"
 #include "DesktopBaseImpl.h"
+#include "Win32ScreenDriverFactory.h"
 #include "log-writer/LogWriter.h"
 
-class DesktopWinImpl : public GuiThread,
-                   public DesktopBaseImpl
+class DesktopWinImpl : public GuiThread, public DesktopBaseImpl
 {
 public:
   DesktopWinImpl(ClipboardListener *extClipListener,
@@ -54,6 +54,8 @@ private:
 
   virtual bool isRemoteInputTempBlocked();
   virtual void applyNewConfiguration();
+
+  Win32ScreenDriverFactory m_scrDriverFactory;
 
   WallpaperUtil *m_wallPaper;
 

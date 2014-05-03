@@ -69,6 +69,7 @@ public:
 
   void addUpdateContainer(const UpdateContainer *updateContainer);
   void getUpdateContainer(UpdateContainer *updCont);
+  bool checkForUpdates(const Region *region);
 
   void extract(UpdateContainer *updateContainer);
 

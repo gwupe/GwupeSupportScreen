@@ -41,7 +41,9 @@ void EncodeOptions::reset()
   m_compressionLevel = EO_DEFAULT;
   m_jpegQualityLevel = EO_DEFAULT;
 
+  m_enableRRE = false;
   m_enableHextile = false;
+  m_enableZrle = false;
   m_enableTight = false;
 
   m_enableCopyRect = false;
@@ -65,8 +67,12 @@ void EncodeOptions::setEncodings(std::vector<int> *list)
     }
     if (code == EncodingDefs::TIGHT) {
       m_enableTight = true;
+    } else if (code == EncodingDefs::ZRLE) {
+      m_enableZrle = true;
     } else if (code == EncodingDefs::HEXTILE) {
       m_enableHextile = true;
+    } else if (code == EncodingDefs::RRE) {
+      m_enableRRE = true;
     } else if (code == EncodingDefs::COPYRECT) {
       m_enableCopyRect = true;
     } else if (code == PseudoEncDefs::RICH_CURSOR) {
@@ -97,8 +103,12 @@ bool EncodeOptions::encodingEnabled(int code) const
   switch (code) {
   case EncodingDefs::RAW:
     return true;
+  case EncodingDefs::RRE:
+    return m_enableRRE;
   case EncodingDefs::HEXTILE:
     return m_enableHextile;
+  case EncodingDefs::ZRLE:
+    return m_enableZrle;
   case EncodingDefs::TIGHT:
     return m_enableTight;
   }
@@ -144,6 +154,8 @@ bool EncodeOptions::desktopSizeEnabled() const
 bool EncodeOptions::normalEncoding(int code)
 {
   return (code == EncodingDefs::RAW ||
+          code == EncodingDefs::RRE ||
           code == EncodingDefs::HEXTILE ||
+          code == EncodingDefs::ZRLE ||
           code == EncodingDefs::TIGHT);
 }

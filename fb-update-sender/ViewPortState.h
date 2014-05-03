@@ -65,12 +65,18 @@ public:
   // will be changed to unresolved.
   void unresolveHwnd();
 
+  // After calling this function the update() function will set the view
+  // port rectangle to "Full desktop" and the view port region to a region constrained
+  // by windows of the process id.
+  void setProcessId(unsigned int processId);
+
 private:
   static const int FULL_DESKTOP = 0;
   static const int PRIMARY_DISPLAY = 1;
   static const int ARBITRARY_RECT = 2;
   static const int WINDOW_RECT = 3;
   static const int DISPLAY_NUMBER = 4;
+  static const int APPLICATION = 5;
 
   int m_mode;
   Rect m_arbitraryRect;
@@ -78,6 +84,7 @@ private:
   StringStorage m_windowName;
   bool m_windowIsResolved;
   unsigned char m_displayNumber;
+  unsigned int m_processId;
 
   friend class ViewPort;
 };

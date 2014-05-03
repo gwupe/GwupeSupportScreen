@@ -92,7 +92,9 @@ protected:
   int m_preferredEncoding;
 
   // FIXME: Use something like std::map instead of individual variables.
+  bool m_enableRRE;
   bool m_enableHextile;
+  bool m_enableZrle;
   bool m_enableTight;
 
   int m_compressionLevel;

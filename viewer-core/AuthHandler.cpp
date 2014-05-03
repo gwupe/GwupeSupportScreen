@@ -59,6 +59,11 @@ AuthCanceledException::~AuthCanceledException()
 {
 }
 
+AuthHandler::AuthHandler(int authType)
+: m_id(authType)
+{
+}
+
 AuthHandler::~AuthHandler()
 {
 }

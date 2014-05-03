@@ -27,13 +27,17 @@
 
 #include "util/StringStorage.h"
 #include "region/Dimension.h"
+#include "region/Region.h"
 #include "rfb/PixelFormat.h"
+#include "rfb/FrameBuffer.h"
 #include "fb-update-sender/UpdateRequestListener.h"
 
 // This class is a public interface to a desktop.
 class Desktop : public UpdateRequestListener
 {
 public:
+  virtual ~Desktop() {}
+
   // Puts a current desktop name from working session to the
   // desktopName argument and an user name to userMame.
   virtual void getCurrentUserInfo(StringStorage *desktopName,
@@ -50,9 +54,17 @@ public:
   virtual void getWindowCoords(HWND hwnd, Rect *rect) = 0;
   virtual HWND getWindowHandleByName(const StringStorage *windowName) = 0;
 
+  virtual void getApplicationRegion(unsigned int procId, Region *region) = 0;
+
   virtual void setKeyboardEvent(UINT32 keySym, bool down) = 0;
   virtual void setMouseEvent(UINT16 x, UINT16 y, UINT8 buttonMask) = 0;
   virtual void setNewClipText(const StringStorage *newClipboard) = 0;
+
+  // Updates external frame buffer pixels only for the region from view port
+  // located at the place in a central frame buffer.
+  // If view port is out of central frame buffer bounds the function will return false.
+  virtual bool updateExternalFrameBuffer(FrameBuffer *fb, const Region *region,
+                                         const Rect *viewPort) = 0;
 };
 
 #endif // __DESKTOP_H__

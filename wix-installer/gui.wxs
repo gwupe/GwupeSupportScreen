@@ -25,7 +25,11 @@
       <Publish Dialog="CustomizeDlg" Control="Next" Event="NewDialog" Value="AdditionalTasks" Order="10">
         (WixUI_InstallMode = "InstallTypical" OR WixUI_InstallMode = "InstallComplete" OR
         WixUI_InstallMode = "InstallCustom" OR WixUI_InstallMode = "Change") AND
+        <?ifndef VIEWER_FREE ?>
         (<![CDATA[&Server=3 OR &Viewer = 3]]>)
+        <?else?>
+        (<![CDATA[&Server=3]]>)
+        <?endif?>
       </Publish>
 
       <Publish Dialog="AdditionalTasks" Control="Back" Event="NewDialog" Value="CustomizeDlg" Order="1">
@@ -41,7 +45,11 @@
       <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="AdditionalTasks" Order="10">
         (WixUI_InstallMode = "InstallTypical" OR WixUI_InstallMode = "InstallComplete" OR
         WixUI_InstallMode = "InstallCustom" OR WixUI_InstallMode = "Change") AND
+        <?ifndef VIEWER_FREE ?>
         (<![CDATA[&Server=3 OR &Viewer = 3]]>)
+        <?else?>
+        (<![CDATA[&Server=3]]>)
+        <?endif?>
       </Publish>
     </UI>
   </Fragment>

@@ -44,7 +44,7 @@ const char *ZLibBase::getOutput() const
   return &m_output.front();
 }
 
-size_t ZLibBase::getOutputSize() const
+unsigned long ZLibBase::getOutputSize() const
 {
   return m_outputSize;
 }

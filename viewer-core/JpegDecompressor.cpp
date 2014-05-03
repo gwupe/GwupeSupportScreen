@@ -56,6 +56,7 @@ void JpegDecompressor::errorExit(j_common_ptr cinfo)
 {
   (*cinfo->err->output_message) (cinfo);
   StringStorage error = getMessage(cinfo);
+  jpeg_destroy(cinfo);
   throw Exception(error.getString());
 }
 

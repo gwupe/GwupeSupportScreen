@@ -117,36 +117,43 @@ void FileTransferReplyBuffer::onFileListReply(DataInputStream *input)
                                      compressionLevel);
   }
 
-  // FIXME: type conversion in C-style
-  ByteArrayInputStream memoryInputStream((const char *)(&buffer.front()),
-                                         uncompressedSize);
-  DataInputStream filesInfoReader(&memoryInputStream);
+  if (!buffer.empty()) {
+    // FIXME: type conversion in C-style
+    ByteArrayInputStream memoryInputStream(reinterpret_cast<char *>(&buffer.front()),
+                                           uncompressedSize);
+    DataInputStream filesInfoReader(&memoryInputStream);
 
-  if (m_filesInfo != NULL) {
-    delete[] m_filesInfo;
+    if (m_filesInfo != 0) {
+      delete[] m_filesInfo;
+      m_filesInfo = 0;
+    }
+
+    m_filesInfoCount = filesInfoReader.readUInt32();
+    if (m_filesInfoCount != 0) {
+      m_filesInfo = new FileInfo[m_filesInfoCount];
+    }
+
+    for (UINT32 i = 0; i < m_filesInfoCount; i++) {
+      FileInfo *fileInfo = &m_filesInfo[i];
+
+      fileInfo->setSize(filesInfoReader.readUInt64());
+      fileInfo->setLastModified(filesInfoReader.readUInt64());
+      fileInfo->setFlags(filesInfoReader.readUInt16());
+
+      StringStorage t;
+      filesInfoReader.readUTF8(&t);
+
+      fileInfo->setFileName(t.getString());
+    } // for all newly created file's info
+
+    m_logWriter->info(_T("Received file list reply: \n")
+                      _T("\t files count = %d\n")
+                      _T("\t use compression = %d\n"),
+                      m_filesInfoCount, compressionLevel);
+  } else {
+    m_logWriter->info(_T("Received file list reply is not read: ")
+                      _T("compressed buffer is empty"));
   }
-
-  m_filesInfoCount = filesInfoReader.readUInt32();
-  m_filesInfo = new FileInfo[m_filesInfoCount];
-
-  for (UINT32 i = 0; i < m_filesInfoCount; i++) {
-    FileInfo *fileInfo = &m_filesInfo[i];
-
-    fileInfo->setSize(filesInfoReader.readUInt64());
-    fileInfo->setLastModified(filesInfoReader.readUInt64());
-    fileInfo->setFlags(filesInfoReader.readUInt16());
-
-    StringStorage t;
-    filesInfoReader.readUTF8(&t);
-
-    fileInfo->setFileName(t.getString());
-  } // for all newly created file's info
-
-  m_logWriter->info(_T("Received file list reply: \n")
-                    _T("\t files count = %d\n")
-                    _T("\t use compression = %d\n"),
-                    m_filesInfoCount, compressionLevel);
-
 }
 
 void FileTransferReplyBuffer::onMd5DataReply(DataInputStream *input)
@@ -251,11 +258,16 @@ vector<UINT8> FileTransferReplyBuffer::readCompressedDataBlock(DataInputStream *
   // Read compressed data
   //
 
+  if (coSize == 0) {
+    return coBuffer;
+  }
+
   input->readFully(&coBuffer.front(), coSize);
 
-  if (compressionLevel == 0)
+  if (compressionLevel == 0) {
     return coBuffer;
-  
+  }
+
   vector<UINT8> uncoBuffer(uncoSize);
 
   m_inflater.setUnpackedSize(uncoSize);
@@ -266,6 +278,9 @@ vector<UINT8> FileTransferReplyBuffer::readCompressedDataBlock(DataInputStream *
 
   _ASSERT(m_inflater.getOutputSize() == uncoSize);
 
-  memcpy(&uncoBuffer.front(), m_inflater.getOutput(), uncoSize);
+  if (uncoSize != 0) {
+    memcpy(&uncoBuffer.front(), m_inflater.getOutput(), uncoSize);
+  }
+
   return uncoBuffer;
 }

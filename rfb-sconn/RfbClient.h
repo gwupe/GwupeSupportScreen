@@ -54,7 +54,7 @@ enum ClientState
 };
 
 // FIXME: Document it, i understand nothing from such kind of description.
-class RfbClient: public Thread, ClientInputEventListener
+class RfbClient: public Thread, ClientInputEventListener, private SenderControlInformationInterface
 {
 public:
   RfbClient(NewConnectionEvents *newConnectionEvents, SocketIPv4 *socket,
@@ -89,7 +89,6 @@ public:
 
   bool clientIsReady() const { return m_updateSender->clientIsReady(); }
   void sendUpdate(const UpdateContainer *updateContainer,
-                  const FrameBuffer *frameBuffer,
                   const CursorShape *cursorShape);
   void sendClipboard(const StringStorage *newClipboard);
 
@@ -114,6 +113,9 @@ private:
   void setClientState(ClientState newState);
 
   Rect getViewPortRect(const Dimension *fbDimension);
+  virtual void onGetViewPort(Rect *viewRect, bool *shareApp, Region *shareAppRegion);
+  void getViewPortInfo(const Dimension *fbDimension, Rect *resultRect,
+                       bool *shareApp, Region *shareAppRegion);
 
   ClientState m_clientState;
   bool m_isMarkedOk;

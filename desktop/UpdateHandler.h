@@ -29,7 +29,7 @@
 #include "UpdateKeeper.h"
 #include "UpdateFilter.h"
 #include "ScreenGrabber.h"
-#include "WindowsMouseGrabber.h"
+#include "WindowsCursorShapeGrabber.h"
 #include "rfb/FrameBuffer.h"
 #include "thread/AutoLock.h"
 #include "UpdateListener.h"
@@ -91,11 +91,18 @@ public:
 
   void initFrameBuffer(const FrameBuffer *newFb);
 
+  virtual bool updateExternalFrameBuffer(FrameBuffer *fb, const Region *region,
+                                         const Rect *viewPort);
+
   // FIXME: It's no good idea to place this function to here.
   // Because it uses only for the UpdateHandlerClient class.
   virtual void sendInit(BlockingGate *gate) {}
 
 protected:
+  virtual bool updateExternalFrameBuffer(FrameBuffer *dstFb, FrameBuffer *srcFb,
+                                         const Region *region,
+                                         const Rect *viewPort);
+
   FrameBuffer m_backupFrameBuffer;
   LocalMutex m_fbLocMut;
 

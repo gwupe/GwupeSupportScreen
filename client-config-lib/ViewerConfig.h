@@ -52,20 +52,20 @@ public:
   // Serializes client configuration from settings storage.
   // Returns true if was no errors during serialization,
   // false, otherwise.
-  bool saveToStorage(SettingsManager *storage);
+  bool saveToStorage(SettingsManager *storage) const;
 
   // Sets port for incoming connection when client runs in daemoon mode
   void setListenPort(int listenPort);
   // Returns listen port value
-  int getListenPort();
+  int getListenPort() const;
 
   // Returns log level in 0 - 9 range
   void setLogLevel(int logLevel);
   // Returns log level
-  int getLogLevel();
+  int getLogLevel() const;
 
   // Puts log directory to the logDir argument.
-  void getLogDir(StringStorage *logDir);
+  void getLogDir(StringStorage *logDir) const;
 
   // Creates path to log file and place value to m_pathToLogFile member
   // creates logger and return pointer to him
@@ -77,17 +77,17 @@ public:
   // Sets number of connections to remember
   void setHistoryLimit(int historyLimit);
   // Returns number of connections to remember
-  int getHistoryLimit();
+  int getHistoryLimit() const;
 
   // Sets "show toolbar" flag
   void showToolbar(bool show);
   // Returns "show toolbar" flag
-  bool isToolbarShown();
+  bool isToolbarShown() const;
 
   // Sets "prompt on fullscreen flag"
   void promptOnFullscreen(bool promt);
   // Returns "prompt on fullscreen flag"
-  bool isPromptOnFullscreenEnabled();
+  bool isPromptOnFullscreenEnabled() const;
 
   // Returns path to log file if file is avaliable to write,
   // returns NULL otherwise

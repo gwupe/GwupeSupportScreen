@@ -86,6 +86,8 @@ BOOL AdministrationConfigDialog::onCommand(UINT controlID, UINT notificationID)
       onLogForAllUsersClick();
     } else if (controlID == IDC_USE_CONTROL_AUTH_CHECKBOX) {
       onUseControlAuthClick();
+    } else if (controlID == IDC_REPEAT_CONTROL_AUTH_CHECKBOX) {
+      onRepeatControlAuthClick();
     } else if (controlID == IDC_CONTROL_PASSWORD_BUTTON) {
       onChangeControlPasswordClick();
     } else if (controlID == IDC_UNSET_CONTROL_PASWORD_BUTTON) {
@@ -135,6 +137,8 @@ void AdministrationConfigDialog::updateUI()
   m_logLevel.setSignedInt(m_config->getLogLevel());
 
   m_useControlAuth.check(m_config->isControlAuthEnabled());
+  m_repeatControlAuth.check(m_config->getControlAuthAlwaysChecking());
+  m_repeatControlAuth.setEnabled(m_useControlAuth.isChecked());
 
   ConfigDialog *configDialog = (ConfigDialog *)m_parentDialog;
 
@@ -251,6 +255,7 @@ void AdministrationConfigDialog::apply()
   }
 
   m_config->useControlAuth(m_useControlAuth.isChecked());
+  m_config->setControlAuthAlwaysChecking(m_repeatControlAuth.isChecked());
 
   if (m_cpControl->hasPassword()) {
     m_config->setControlPassword((const unsigned char *)m_cpControl->getCryptedPassword());
@@ -282,6 +287,7 @@ void AdministrationConfigDialog::initControls()
   m_setControlPasswordButton.setWindow(GetDlgItem(hwnd, IDC_CONTROL_PASSWORD_BUTTON));
   m_unsetControlPasswordButton.setWindow(GetDlgItem(hwnd, IDC_UNSET_CONTROL_PASWORD_BUTTON));
   m_useControlAuth.setWindow(GetDlgItem(hwnd, IDC_USE_CONTROL_AUTH_CHECKBOX));
+  m_repeatControlAuth.setWindow(GetDlgItem(hwnd, IDC_REPEAT_CONTROL_AUTH_CHECKBOX));
 
   m_shared[0].setWindow(GetDlgItem(hwnd, IDC_SHARED_RADIO1));
   m_shared[1].setWindow(GetDlgItem(hwnd, IDC_SHARED_RADIO2));
@@ -358,7 +364,13 @@ void AdministrationConfigDialog::onLogForAllUsersClick()
 void AdministrationConfigDialog::onUseControlAuthClick()
 {
   m_cpControl->setEnabled(m_useControlAuth.isChecked());
+  m_repeatControlAuth.setEnabled(m_useControlAuth.isChecked());
 
+  ((ConfigDialog *)m_parentDialog)->updateApplyButtonState();
+}
+
+void AdministrationConfigDialog::onRepeatControlAuthClick()
+{
   ((ConfigDialog *)m_parentDialog)->updateApplyButtonState();
 }
 

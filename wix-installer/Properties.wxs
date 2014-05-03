@@ -95,6 +95,9 @@
     <Property Id='SET_USECONTROLAUTHENTICATION'> 0 </Property>
     <Property Id='VALUE_OF_USECONTROLAUTHENTICATION'> 0 </Property>
 
+    <Property Id='SET_REPEATCONTROLAUTHENTICATION'> 0 </Property>
+    <Property Id='VALUE_OF_REPEATCONTROLAUTHENTICATION'> 0 </Property>
+
     <Property Id='SET_CONTROLPASSWORD' Secure='yes'> 0 </Property>
     <Property Id='VALUE_OF_CONTROLPASSWORD' Secure='yes'> </Property>
 
@@ -528,6 +531,21 @@
         <RemoveRegistryValue Id="UseControlAuthentication_Delete_RegValue" Root="HKLM" Key="Software\TightVNC\Server"
                              Name="UseControlAuthentication" />
         <Condition> SET_USECONTROLAUTHENTICATION = -1 </Condition>
+      </Component>
+
+      <Component Id='RepeatControlAuthentication_Property_Component' Feature='Server' Guid='{80EB6374-546A-43d3-9F1F-B9978892AA2F}' Permanent='yes'>
+        <RegistryValue Id='RepeatControlAuthentication_RegValue' Action='write'
+                       Root='HKLM' Key='Software\TightVNC\Server'
+                       Name='RepeatControlAuthentication' Value='[VALUE_OF_REPEATCONTROLAUTHENTICATION]' Type='integer'>
+          <Permission GenericAll='yes' User='System'/>
+          <Permission GenericAll='yes' User='Administrators'/>
+        </RegistryValue>
+        <Condition> SET_REPEATCONTROLAUTHENTICATION = 1 </Condition>
+      </Component>
+      <Component Id='RepeatControlAuthentication_Delete_Component' Feature='Server' Guid='{97DA271A-04B6-4dc5-8BA1-1CC84AD4C793}' Permanent='yes'>
+        <RemoveRegistryValue Id="RepeatControlAuthentication_Delete_RegValue" Root="HKLM" Key="Software\TightVNC\Server"
+                             Name="RepeatControlAuthentication" />
+        <Condition> SET_REPEATCONTROLAUTHENTICATION = -1 </Condition>
       </Component>
 
       <Component Id='ControlPassword_Delete_Component' Feature='Server' Guid='{C9B5796A-30DB-489e-B886-5DF997342974}' Permanent='yes'>

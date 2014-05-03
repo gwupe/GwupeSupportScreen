@@ -44,6 +44,7 @@ TcpDispatcherInitializer::TcpDispatcherInitializer(Channel *channel,
                              LogWriter *log)
 : m_output(channel),
   m_input(channel),
+  m_log(log),
   m_sendDispatcherName(*sendDispatcherName),
   m_connectionType(connectionType),
   m_connectionId(connectionId),

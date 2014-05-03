@@ -118,6 +118,13 @@ public:
    * @return true if this region is empty, false otherwise.
    */
   bool isEmpty() const;
+
+  /**
+   * Tests point location relative of the region.
+   * @return true if this point locates inside the region, false otherwise.
+   */
+  bool isPointInside(int x, int y) const;
+
   /**
    * Checks if this region equals to another region.
    * @param other a pointer to another region to compare this region to.

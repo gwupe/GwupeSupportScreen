@@ -25,9 +25,10 @@
 #ifndef _ZRLE_DECODER_H_
 #define _ZRLE_DECODER_H_
 
-#include "util/Inflater.h"
-
 #include "DecoderOfRectangle.h"
+
+#include "io-lib/DataInputStream.h"
+#include "util/Inflater.h"
 
 class ZrleDecoder : public DecoderOfRectangle
 {
@@ -36,46 +37,42 @@ public:
   virtual ~ZrleDecoder();
 
 protected:
+  typedef vector<unsigned int> Palette;
+
+protected:
   virtual void decode(RfbInputGate *input,
                       FrameBuffer *frameBuffer,
                       const Rect *dstRect);
-private:
-  typedef vector<unsigned int> Palette;
 
-  void inflate(RfbInputGate *input, size_t unpackedSize);
 
-  int readType(const vector<unsigned char> &out, size_t *const readed);
+  void readAndInflate(RfbInputGate *input, size_t maximalUnpackedSize);
 
-  size_t readRunLength(const vector<unsigned char> &out,
-                       size_t *const readed);
+  int readType(DataInputStream *input);
 
-  Palette readPalette(const vector<unsigned char> &out,
-                      size_t *readed,
-                      const int paletteSize);
+  size_t readRunLength(DataInputStream *input);
 
-  void readRawTile(const vector<unsigned char> &out,
-                   size_t *const readed,
+  void readPalette(DataInputStream *input,
+                   const int paletteSize,
+                   Palette *palette);
+
+  void readRawTile(DataInputStream *input,
                    vector<char> &pixels,
                    const Rect *tileRect);
 
-  void readSolidTile(const vector<unsigned char> &out,
-                     size_t *const readed,
+  void readSolidTile(DataInputStream *input,
                      vector<char> &pixels,
                      const Rect *tileRect);
 
-  void readPackedPaletteTile(const vector<unsigned char> &out,
-                             size_t *const readed,
+  void readPackedPaletteTile(DataInputStream *input,
                              vector<char> &pixels,
                              const Rect *tileRect,
                              const int type);
 
-  void readPlainRleTile(const vector<unsigned char> &out,
-                        size_t *const readed,
+  void readPlainRleTile(DataInputStream *input,
                         vector<char> &pixels,
                         const Rect *tileRect);
 
-  void readPaletteRleTile(const vector<unsigned char> &out,
-                          size_t *const readed,
+  void readPaletteRleTile(DataInputStream *input,
                           vector<char> &pixels,
                           const Rect *tileRect,
                           const int type);

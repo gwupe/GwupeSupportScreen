@@ -60,6 +60,7 @@ public:
   virtual void getNormalizedRect(Rect *rect);
   virtual void getWindowCoords(HWND hwnd, Rect *rect);
   virtual HWND getWindowHandleByName(const StringStorage *windowName);
+  virtual void getApplicationRegion(unsigned int procId, Region *region);
   virtual void setKeyboardEvent(UINT32 keySym, bool down);
   virtual void setMouseEvent(UINT16 x, UINT16 y, UINT8 buttonMask);
   virtual void setNewClipText(const StringStorage *newClipboard);
@@ -80,6 +81,9 @@ protected:
   bool isRemoteInputAllowed();
   // This is an auxiliary function which determines that
   virtual bool isRemoteInputTempBlocked() = 0;
+
+  virtual bool updateExternalFrameBuffer(FrameBuffer *fb, const Region *region,
+                                         const Rect *viewPort);
 
   void sendUpdate();
 

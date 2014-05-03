@@ -89,11 +89,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
   StringStorage firstKey(_T(""));
 
+
   try {
     WinCommandLineArgs args(lpCmdLine);
     parser.parse(format,  sizeof(format) / sizeof(CommandLineFormat), &args);
-  } 
-  catch (...) {
+  } catch (...) {
   }
   parser.getOption(0, &firstKey);
 
@@ -112,8 +112,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         WindowNames::WINDOW_CLASS_NAME,
         lpCmdLine);
       return tvnControl.run();
-    } 
-	catch (Exception &fatalException) {
+    } catch (Exception &fatalException) {
       MessageBox(0,
         fatalException.getMessage(),
         StringTable::getString(IDS_MBC_TVNCONTROL),
@@ -166,7 +165,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     return tvnsc.run();
   }
 
-	// No additional applications, run TightVNC server as single application.
+  // No additional applications, run TightVNC server as single application.
 	TvnService tvnService(&winEventLogWriter, &winEventLogWriter);
 	try {
 		crashHook.setHklmRoot();

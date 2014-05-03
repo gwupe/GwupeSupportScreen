@@ -34,6 +34,7 @@
 #include "ShareWindowCommand.h"
 #include "ShareRectCommand.h"
 #include "ShareFullCommand.h"
+#include "ShareAppCommand.h"
 #include "ControlAuth.h"
 #include "ConnectCommand.h"
 #include "ShutdownCommand.h"
@@ -48,6 +49,7 @@
 
 #include "win-system/Environment.h"
 #include "win-system/Shell.h"
+#include "win-system/Process.h"
 #include "win-system/WinCommandLineArgs.h"
 
 #include "thread/ZombieKiller.h"
@@ -204,8 +206,9 @@ int ControlApplication::run()
       command = new ShareRectCommand(m_serverControl, &shareRect);
     } else if (cmdLineParser.hasShareFull()) {
       command = new ShareFullCommand(m_serverControl);
+    } else if (cmdLineParser.hasShareApp()) {
+      command = new ShareAppCommand(m_serverControl, cmdLineParser.getSharedAppProcessId());
     }
-
 
     retCode = runControlCommand(command);
 
@@ -319,8 +322,6 @@ void ControlApplication::execute()
 
 int ControlApplication::runControlInterface(bool showIcon)
 {
-  ControlTrayIcon *icon = 0;
-
   m_trayIcon = new ControlTrayIcon(m_serverControl, this, this, showIcon);
 
   resume();
@@ -499,10 +500,17 @@ void ControlApplication::checkServicePasswords()
 void ControlApplication::reloadConfig()
 {
   StringStorage pathToBinary;
-  // Get path to tvnserver binary.
-  Environment::getCurrentModulePath(&pathToBinary);
   try {
-    Shell::runAsAdmin(pathToBinary.getString(), _T("-controlservice -reload"));
-  } catch (SystemException &) {
+    // Get path to tvnserver binary.
+    Environment::getCurrentModulePath(&pathToBinary);
+    Process processToReloadConfig(pathToBinary.getString(), _T("-controlservice -reload"));
+    processToReloadConfig.start();
+  } catch (Exception &e) {
+    StringStorage errMess;
+    errMess.format(StringTable::getString(IDS_FAILED_TO_RELOAD_SERVICE_ON_CHECK_PASS), e.getMessage());
+    MessageBox(0,
+      errMess.getString(),
+      StringTable::getString(IDS_MBC_TVNCONTROL),
+      MB_OK | MB_ICONERROR);
   }
 }

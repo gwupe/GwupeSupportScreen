@@ -143,11 +143,6 @@ void MirrorDriverClient::open()
 {
   _ASSERT(!m_isDriverOpened);
 
-  if (false && ::GetSystemMetrics(SM_REMOTESESSION)) {
-    throw Exception(_T("We're running in a Remote Desktop session.")
-                    _T(" Can't operate in this environment!"));
-  }
-
   extractDeviceInfo(_T("Mirage Driver"));
   openDeviceRegKey(_T("dfmirage"));
 

@@ -498,6 +498,9 @@ bool Configurator::saveServerConfig(SettingsManager *sm)
   if (!sm->setBoolean(_T("UseControlAuthentication"), m_serverConfig.isControlAuthEnabled())) {
     saveResult = false;
   }
+  if (!sm->setBoolean(_T("RepeatControlAuthentication"), m_serverConfig.getControlAuthAlwaysChecking())) {
+    saveResult = false;
+  }
   if (!sm->setBoolean(_T("LoopbackOnly"), m_serverConfig.isOnlyLoopbackConnectionsAllowed())) {
     saveResult = false;
   }
@@ -627,6 +630,12 @@ bool Configurator::loadServerConfig(SettingsManager *sm, ServerConfig *config)
   } else {
     m_isConfigLoadedPartly = true;
     m_serverConfig.useControlAuth(boolVal);
+  }
+  if (!sm->getBoolean(_T("RepeatControlAuthentication"), &boolVal)) {
+    loadResult = false;
+  } else {
+    m_isConfigLoadedPartly = true;
+    m_serverConfig.setControlAuthAlwaysChecking(boolVal);
   }
   if (!sm->getBoolean(_T("LoopbackOnly"), &boolVal)) {
     loadResult = false;

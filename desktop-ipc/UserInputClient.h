@@ -52,6 +52,7 @@ public:
   virtual void getNormalizedRect(Rect *rect);
   virtual void getWindowCoords(HWND hwnd, Rect *rect);
   virtual HWND getWindowHandleByName(const StringStorage *windowName);
+  virtual void getApplicationRegion(unsigned int procId, Region *region);
 
   // To catch a new clipboard
   virtual void onRequest(UINT8 reqCode, BlockingGate *backGate);

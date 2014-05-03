@@ -218,8 +218,8 @@ void RfbClient::execute()
                                   &encCaps);
     // Init modules
     // UpdateSender initialization
-    m_updateSender = new UpdateSender(&codeRegtor, m_desktop,
-                                      &output, m_id, m_log);
+    m_updateSender = new UpdateSender(&codeRegtor, m_desktop, this,
+                                      &output, m_id, m_desktop, m_log);
     m_log->debug(_T("UpdateSender has been created"));
     PixelFormat pf;
     Dimension fbDim;
@@ -286,12 +286,9 @@ void RfbClient::execute()
 }
 
 void RfbClient::sendUpdate(const UpdateContainer *updateContainer,
-                           const FrameBuffer *frameBuffer,
                            const CursorShape *cursorShape)
 {
-  Rect viewPortRect = getViewPortRect(&frameBuffer->getDimension());
-  m_updateSender->newUpdates(updateContainer, frameBuffer, cursorShape,
-                             &viewPortRect);
+  m_updateSender->newUpdates(updateContainer, cursorShape);
 }
 
 void RfbClient::sendClipboard(const StringStorage *newClipboard)
@@ -306,14 +303,25 @@ void RfbClient::onKeyboardEvent(UINT32 keySym, bool down)
 
 void RfbClient::onMouseEvent(UINT16 x, UINT16 y, UINT8 buttonMask)
 {
-  // Retrieve a view port rect.
   PixelFormat pfStub;
   Dimension fbDim;
   m_desktop->getFrameBufferProperties(&fbDim, &pfStub);
-  Rect vp = getViewPortRect(&fbDim);
 
-  m_updateSender->blockCursorPosSending();
-  m_desktop->setMouseEvent(x + vp.left, y + vp.top, buttonMask);
+  Rect vp;
+  bool shareApp;
+  Region sharedRegion;
+  getViewPortInfo(&fbDim, &vp, &shareApp, &sharedRegion);
+
+  if (!shareApp) {
+    sharedRegion.clear();
+    sharedRegion.addRect(&vp);
+  }
+  bool pointInside = sharedRegion.isPointInside(x + vp.left, y + vp.top);
+
+  if (pointInside) {
+    m_updateSender->blockCursorPosSending();
+    m_desktop->setMouseEvent(x + vp.left, y + vp.top, buttonMask);
+  }
 }
 
 Rect RfbClient::getViewPortRect(const Dimension *fbDimension)
@@ -324,4 +332,24 @@ Rect RfbClient::getViewPortRect(const Dimension *fbDimension)
 
   return m_constViewPort.getViewPortRect().intersection(
     &m_dynamicViewPort.getViewPortRect());
+}
+
+void RfbClient::getViewPortInfo(const Dimension *fbDimension, Rect *resultRect,
+                                bool *shareApp, Region *shareAppRegion)
+{
+  AutoLock al(&m_viewPortMutex);
+
+  *resultRect = getViewPortRect(fbDimension);
+  *shareApp = m_dynamicViewPort.getOnlyApplication();
+  if (*shareApp) {
+    m_dynamicViewPort.getApplicationRegion(shareAppRegion);
+  }
+}
+
+void RfbClient::onGetViewPort(Rect *viewRect, bool *shareApp, Region *shareAppRegion)
+{
+  PixelFormat pfStub;
+  Dimension fbDim;
+  m_desktop->getFrameBufferProperties(&fbDim, &pfStub);
+  getViewPortInfo(&fbDim, viewRect, shareApp, shareAppRegion);
 }

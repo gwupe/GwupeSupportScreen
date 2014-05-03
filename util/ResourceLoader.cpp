@@ -23,6 +23,7 @@
 //
 
 #include "ResourceLoader.h"
+#include "util/UnicodeStringStorage.h"
 
 #include <crtdbg.h>
 
@@ -48,30 +49,45 @@ HICON ResourceLoader::loadIcon(const TCHAR *iconName)
 bool ResourceLoader::loadString(UINT id, StringStorage *string)
 {
   _ASSERT(string != 0);
-
-  int resId = (id / 16) + 1;
-  HRSRC resHnd = FindResource(m_appInstance, 
-                              MAKEINTRESOURCE(resId), 
-                              RT_STRING);
   string->setString(_T("(Undef)"));
-  if (resHnd) {
-    HGLOBAL hGlobal = LoadResource(m_appInstance, 
-                                   resHnd);
+
+  //
+  // Format of string table:
+  // Strings are stored in groups of 16 strings.
+  // Group format is:
+  // | length  |     string     | length  | string  | ...
+  // | 2 bytes | len * 2 bytes  | 2 bytes | len * 2 | ...
+  // Strings stored in the UTF16-encoding.
+  // 
+
+
+  // Id of string-group, based from 0.
+  int resId = (id / 16) + 1;
+  HRSRC resHnd = FindResource(m_appInstance,
+                              MAKEINTRESOURCE(resId),
+                              RT_STRING);
+  if (resHnd != 0) {
+    HGLOBAL hGlobal = LoadResource(m_appInstance, resHnd);
     LPVOID lockRes = LockResource(hGlobal);
-    TCHAR* lpStr = reinterpret_cast<TCHAR *>(lockRes);
+
+    WCHAR *lpStr = reinterpret_cast<WCHAR *>(lockRes);
     for (UINT i = 0; i < (id % 16); i++) {
-      lpStr += 1 + static_cast<int>(lpStr[0]);
+      lpStr += 1 + static_cast<UINT16>(lpStr[0]);
     }
-    int strLen = static_cast<int>(lpStr[0]);
-    std::vector<TCHAR> strBuff;
+
+    UINT16 strLen = static_cast<UINT16>(lpStr[0]);
+
+    std::vector<WCHAR> strBuff;
     strBuff.resize(strLen + 1);
-    memcpy(&strBuff[0], 
-           &lpStr[1], 
-           strLen * sizeof(TCHAR));
-    strBuff[strLen] = _T('\0');
+    memcpy(&strBuff.front(), lpStr + 1, strLen * sizeof(WCHAR));
+    strBuff[strLen] = L'\0';
+
     UnlockResource(lockRes);
     FreeResource(hGlobal);
-    string->setString(static_cast<TCHAR *>(&strBuff[0]));
+
+    UnicodeStringStorage unicodeString;
+    unicodeString.setString(&strBuff.front());
+    unicodeString.toStringStorage(string);
   }
   return true;
 }
@@ -82,7 +98,7 @@ HACCEL ResourceLoader::loadAccelerator(UINT id)
                           MAKEINTRESOURCE(id)); 
 }
 
-HCURSOR ResourceLoader::loadStandartCursor(const TCHAR *id)
+HCURSOR ResourceLoader::loadStandardCursor(const TCHAR *id)
 {
   return LoadCursor(0, id);
 }

@@ -39,10 +39,14 @@
 #include "gui/TrackBar.h"
 #include "resource.h"
 
+#include "win-system/WindowsApplication.h"
+
 class ConfigurationDialog : public BaseDialog
 {
 public:
   ConfigurationDialog();
+
+  void setListenerOfUpdate(WindowsApplication *application);
 
 protected:
   BOOL onCommand(UINT controlID, UINT notificationID);
@@ -60,6 +64,8 @@ protected:
   SpinControl m_sverbLvl;
   TextBox m_logging;
   Control m_openLogDir;
+
+  WindowsApplication *m_application;
 
 private:
   void updateControlValues();

@@ -48,6 +48,8 @@ public:
               UpdateContainer *updCont,
               bool fullRegReq,
               const Rect *viewPort,
+              bool shareOnlyApp,
+              const Region *shareAppRegion,
               FrameBuffer *fb,
               CursorShape *cursorShape);
   void restoreFrameBuffer(FrameBuffer *fb);

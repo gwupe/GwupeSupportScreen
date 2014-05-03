@@ -78,7 +78,7 @@ public:
   void newListeningConnection();
   void newConnection(const StringStorage *hostName, const ConnectionConfig *connectionConfig);
   void newConnection(const ConnectionData *conData, const ConnectionConfig *connectionConfig);
-  void startListening(const ConnectionConfig *connectionConfig, int listeningPort);
+  void startListening(int listeningPort);
   void stopListening();
 
   // Inherited from WindowsApplication
@@ -104,11 +104,18 @@ public:
   // LPARAM contained pointer to ConnectionData.
   static const int WM_USER_RECONNECT = WM_USER + 5;
 
+  // This message need send if config is changed.
+  static const int WM_USER_CONFIGURATION_RELOAD = WM_USER + 6;
+
   // This timer is used for deleting dead instances of viewer.
   static const int TIMER_DELETE_DEAD_INSTANCE = 1;
   static const int TIMER_DELETE_DEAD_INSTANCE_DELAY = 50;
 
 protected:
+  void startListeningServer(const int listeningPort);
+  void stopListeningServer();
+  void restartListeningServer();
+
   void registerViewerWindowClass();
   void unregisterViewerWindowClass();
   static LRESULT CALLBACK wndProcViewer(HWND hWnd, UINT msg, WPARAM wparam, LPARAM lparam);

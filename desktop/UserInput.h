@@ -29,6 +29,7 @@
 #include "region/Point.h"
 #include "desktop-ipc/BlockingGate.h"
 #include "region/Rect.h"
+#include "region/Region.h"
 
 // This class will be an abstract interface for user input such as keyboard,
 // mouse pointer, e.t.c., on the server side.
@@ -58,6 +59,8 @@ public:
 
   virtual void getWindowCoords(HWND hwnd, Rect *rect) = 0;
   virtual HWND getWindowHandleByName(const StringStorage *windowName) = 0;
+
+  virtual void getApplicationRegion(unsigned int procId, Region *region) = 0;
 };
 
 #endif // __USERINPUT_H__

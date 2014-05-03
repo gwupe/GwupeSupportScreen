@@ -198,30 +198,27 @@ bool IniFileSettingsManager::setBinaryData(const TCHAR *name, const void *value,
   return false;
 }
 
-// FIXME: Code not testted
-void
-IniFileSettingsManager::getPrivateProfileString(const TCHAR *name,
-                                                StringStorage *value,
-                                                const TCHAR *defaultValue)
+void IniFileSettingsManager::getPrivateProfileString(const TCHAR *name,
+                                                     StringStorage *value,
+                                                     const TCHAR *defaultValue)
 {
   std::vector<TCHAR> buffer;
-  DWORD bufferSize = 0;
-  DWORD increaseStep = 1024;
+  DWORD bufferSize = 1024;
 
   bool tooSmall = false;
 
   do {
     // Allocate buffer
-    bufferSize += increaseStep;
     buffer.resize(bufferSize);
 
     // Try to get string value from storage
     DWORD ret = GetPrivateProfileString(m_appName.getString(), name,
-                                        defaultValue, &buffer[0], bufferSize,
+                                        defaultValue, &buffer.front(), bufferSize,
                                         m_pathToFile.getString());
 
     // This mean that output buffer size is too small
     tooSmall = (ret == bufferSize - 1);
+    bufferSize = bufferSize + bufferSize / 2;
   } while (tooSmall);
 
   value->setString(&buffer.front());

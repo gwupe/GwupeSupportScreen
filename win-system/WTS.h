@@ -33,6 +33,24 @@
 
 typedef DWORD (WINAPI *pWTSGetActiveConsoleSessionId)(void);
 typedef BOOL (WINAPI *pWTSQueryUserToken)(ULONG SessionId, PHANDLE phToken);
+typedef BOOL (WINAPI *pWTSQuerySessionInformationW)(
+  HANDLE hServer, DWORD SessionId,
+  WTS_INFO_CLASS WTSInfoClass,
+  LPWSTR **ppBuffer,
+  DWORD *pBytesReturned);
+typedef BOOL (WINAPI *pWTSQuerySessionInformationA)(
+  HANDLE hServer, DWORD SessionId,
+  WTS_INFO_CLASS WTSInfoClass,
+  LPSTR **ppBuffer,
+  DWORD *pBytesReturned);
+typedef VOID (WINAPI *pWTSFreeMemory)(void *buffer);
+
+#ifdef UNICODE
+#define pWTSQuerySessionInformation pWTSQuerySessionInformationW
+#else
+#define pWTSQuerySessionInformation pWTSQuerySessionInformationA
+#endif
+
 
 /**
  * Wrapper over WTS WinAPI functions.
@@ -73,6 +91,8 @@ public:
   // rdp.
   static void duplicatePipeClientToken(HANDLE pipeHandle);
 
+  static bool getCurrentUserName(StringStorage *userName, LogWriter *log);
+
 private:
   /**
    * Don't allow instanizing of WTS class.
@@ -84,10 +104,15 @@ private:
    */
   static void initialize(LogWriter *log);
 
+  // The initialize() function should be already called before use the wtsFreeMemory() function.
+  static void wtsFreeMemory(void *buffer);
+
   static DynamicLibrary *m_kernel32Library;
   static DynamicLibrary *m_wtsapi32Library;
   static pWTSGetActiveConsoleSessionId m_WTSGetActiveConsoleSessionId;
   static pWTSQueryUserToken m_WTSQueryUserToken;
+  static pWTSQuerySessionInformation m_WTSQuerySessionInformation;
+  static pWTSFreeMemory m_WTSFreeMemory;
 
   /**
    * Determinates if WTS library was initialized.

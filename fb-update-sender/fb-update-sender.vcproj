@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="fb-update-sender"
 	ProjectGUID="{A65753BB-4671-4A1D-A4ED-09CF308DE352}"
 	RootNamespace="fbupdatesender"
@@ -537,10 +537,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\FrameBufferAccessor.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\UpdateSender.cpp"
 				>
 			</File>
@@ -567,7 +563,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\FrameBufferAccessor.h"
+				RelativePath=".\SenderControlInformationInterface.h"
 				>
 			</File>
 			<File

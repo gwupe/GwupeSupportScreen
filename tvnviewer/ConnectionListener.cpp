@@ -46,6 +46,11 @@ ConnectionListener::~ConnectionListener()
   }
 }
 
+UINT16 ConnectionListener::getBindPort() const
+{
+  return TcpServer::getBindPort();
+}
+
 void ConnectionListener::onAcceptConnection(SocketIPv4 *socket)
 {
   AutoLock al(&m_connectionsLock);

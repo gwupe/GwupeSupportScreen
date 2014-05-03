@@ -40,6 +40,8 @@ TvnViewer::TvnViewer(HINSTANCE appInstance, const TCHAR *windowClassName,
   WindowsSocket::startup(2, 1);
   registerViewerWindowClass();
 
+  m_configurationDialog.setListenerOfUpdate(this);
+
   // working with accelerator
   ResourceLoader *rLoader = ResourceLoader::getInstance();
   m_hAccelTable = rLoader->loadAccelerator(IDR_ACCEL_APP_KEYS);
@@ -62,19 +64,16 @@ TvnViewer::~TvnViewer()
   WindowsSocket::cleanup();
 }
 
-void TvnViewer::startListening(const ConnectionConfig *conConf, const int listeningPort)
+void TvnViewer::startListeningServer(const int listeningPort)
 {
-  if (m_isListening) {
-    _ASSERT(true);
-    return;
-  }
-  m_isListening = true;
-
   try {
+    if (m_conListener != 0) {
+      throw Exception(_T("Listening Server already started"));
+    }
     m_conListener = new ConnectionListener(this, listeningPort);
-    m_trayIcon->showIcon();
-  } catch (Exception &) {
+  } catch (const Exception &ex) {
     m_isListening = false;
+    m_logWriter.error(_T("Error in start listening: %s"), ex.getMessage());
     MessageBox(0,
                StringTable::getString(IDS_ERROR_START_LISTENING),
                ProductNames::VIEWER_PRODUCT_NAME,
@@ -82,14 +81,48 @@ void TvnViewer::startListening(const ConnectionConfig *conConf, const int listen
   }
 }
 
+void TvnViewer::stopListeningServer()
+{
+  try {
+    if (m_conListener != 0) {
+      delete m_conListener;
+    }
+  } catch (const Exception &ex) {
+    m_logWriter.error(_T("Error of delete m_conListener: %s"), ex.getMessage());
+  }
+  m_conListener = 0;
+}
+
+void TvnViewer::restartListeningServer()
+{
+  if (m_isListening) {
+    UINT16 newListenPort = ViewerConfig::getInstance()->getListenPort();
+    if (m_conListener->getBindPort() != newListenPort) {
+      stopListeningServer();
+      // FIXME: remove this parameter.
+      startListeningServer(newListenPort);
+    }
+  }
+}
+
+void TvnViewer::startListening(const int listeningPort)
+{
+  if (m_isListening) {
+    _ASSERT(true);
+    return;
+  }
+  m_isListening = true;
+
+  startListeningServer(listeningPort);
+  m_trayIcon->showIcon();
+}
+
 void TvnViewer::stopListening()
 {
   if (m_isListening) {
-    if (m_conListener != 0) {
-      delete m_conListener;
-      m_conListener = 0;
-    }
     m_trayIcon->hide();
+    stopListeningServer();
+
     m_isListening = false;
     m_loginDialog->setListening(false);
   }
@@ -314,11 +347,16 @@ LRESULT CALLBACK TvnViewer::wndProc(HWND hWnd, UINT msg, WPARAM wparam, LPARAM l
         _this->showAboutViewer();
         break;
 
-      case WM_USER_RECONNECT:
+      case WM_USER_RECONNECT: {
         ConnectionData *conData = reinterpret_cast<ConnectionData *>(wparam);
         ConnectionConfig *conConfig = reinterpret_cast<ConnectionConfig *>(lparam);
         _this->newConnection(conData, conConfig);
         _this->m_instances.decreaseToReconnect();
+        break;
+      }
+
+      case WM_USER_CONFIGURATION_RELOAD:
+        _this->restartListeningServer();
         break;
       }
     }

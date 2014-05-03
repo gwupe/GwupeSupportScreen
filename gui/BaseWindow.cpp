@@ -237,18 +237,8 @@ bool BaseWindow::wndProc(UINT message, WPARAM wParam, LPARAM lParam)
     case WM_MOUSEWHEEL:
     case WM_MOUSEMOVE:
     {
-      int wheelSpeed = static_cast<signed short>(HIWORD(wParam))/120;
-      if (wheelSpeed < 0) {
-        wheelSpeed = -wheelSpeed;
-      }
       unsigned char mouseButtons = 0;
-      if (message == WM_MOUSEWHEEL) {
-        if ((signed short)HIWORD(wParam) < 0) {
-          mouseButtons |= MOUSE_WDOWN;
-        } else {
-          mouseButtons |= MOUSE_WUP;
-        }
-      }
+
       mouseButtons |= LOWORD(wParam) & MK_RBUTTON ? MOUSE_RDOWN : 0;
       mouseButtons |= LOWORD(wParam) & MK_MBUTTON ? MOUSE_MDOWN : 0;
       mouseButtons |= LOWORD(wParam) & MK_LBUTTON ? MOUSE_LDOWN : 0;
@@ -259,8 +249,25 @@ bool BaseWindow::wndProc(UINT message, WPARAM wParam, LPARAM lParam)
       point.x = points.x;
       point.y = points.y;
 
-      // If windows-message is WHEEL, then need to translate screen coordinate to client.
-      if (message == WM_MOUSEWHEEL) { 
+      unsigned short wheelSpeed = 0; 
+      if (message == WM_MOUSEWHEEL) {
+        // Get speed wheel and set mouse button.
+        signed short wheelSignedSpeed = static_cast<signed short>(HIWORD(wParam));
+        if (wheelSignedSpeed < 0) {
+          mouseButtons |= MOUSE_WDOWN;
+          wheelSpeed = - wheelSignedSpeed / WHEEL_DELTA;
+        } else {
+          mouseButtons |= MOUSE_WUP;
+          wheelSpeed = wheelSignedSpeed / WHEEL_DELTA;
+        }
+
+        // In some cases wheelSignedSpeed can be smaller than the WHEEL_DELTA,
+        // then wheelSpeed set to 1, but not 0.
+        if (wheelSpeed == 0) {
+          wheelSpeed = 1;
+        }
+
+        // If windows-message is WHEEL, then need to translate screen coordinate to client.
         if (!ScreenToClient(getHWnd(), &point)) {
           point.x = -1;
           point.y = -1;

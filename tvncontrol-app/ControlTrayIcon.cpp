@@ -68,7 +68,7 @@ ControlTrayIcon::ControlTrayIcon(ControlProxy *serverControl,
   m_updateLocalConfigCommand = new UpdateLocalConfigCommand(m_serverControl);
   m_applyChangesMacroCommand = new MacroCommand();
   m_applyChangesMacroCommand->addCommand(m_updateRemoteConfigCommand);
-  m_applyChangesMacroCommand->addCommand(m_updateLocalConfigCommand);
+  // m_applyChangesMacroCommand->addCommand(m_updateLocalConfigCommand);
   m_applyChangesControlCommand = new ControlCommand(m_applyChangesMacroCommand, m_notificator);
 
   // Create config dialog.

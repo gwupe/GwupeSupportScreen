@@ -82,7 +82,7 @@ bool ViewerConfig::loadFromStorage(SettingsManager *storage)
   return loadAllOk;
 }
 
-bool ViewerConfig::saveToStorage(SettingsManager *storage)
+bool ViewerConfig::saveToStorage(SettingsManager *storage) const
 {
   bool saveAllOk = true;
 
@@ -108,7 +108,7 @@ void ViewerConfig::setListenPort(int listenPort)
   m_listenPort = listenPort;
 }
 
-int ViewerConfig::getListenPort()
+int ViewerConfig::getListenPort() const
 {
   AutoLock l(&m_cs);
   return m_listenPort;
@@ -130,13 +130,13 @@ void ViewerConfig::setLogLevel(int logLevel)
   }
 }
 
-int ViewerConfig::getLogLevel()
+int ViewerConfig::getLogLevel() const
 {
   AutoLock l(&m_cs);
   return m_logLevel;
 }
 
-void ViewerConfig::getLogDir(StringStorage *logDir)
+void ViewerConfig::getLogDir(StringStorage *logDir) const
 {
   AutoLock l(&m_cs);
   *logDir = m_pathToLogFile;
@@ -157,7 +157,7 @@ void ViewerConfig::setHistoryLimit(int historyLimit)
   m_conHistory.setLimit(m_historyLimit);
 }
 
-int ViewerConfig::getHistoryLimit()
+int ViewerConfig::getHistoryLimit() const
 {
   AutoLock l(&m_cs);
   return m_historyLimit;
@@ -169,7 +169,7 @@ void ViewerConfig::showToolbar(bool show)
   m_showToolbar = show;
 }
 
-bool ViewerConfig::isToolbarShown()
+bool ViewerConfig::isToolbarShown() const
 {
   AutoLock l(&m_cs);
   return m_showToolbar;
@@ -181,7 +181,7 @@ void ViewerConfig::promptOnFullscreen(bool prompt)
   m_promptOnFullscreen = prompt;
 }
 
-bool ViewerConfig::isPromptOnFullscreenEnabled()
+bool ViewerConfig::isPromptOnFullscreenEnabled() const
 {
   AutoLock l(&m_cs);
   return m_promptOnFullscreen;

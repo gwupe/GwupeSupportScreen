@@ -204,7 +204,7 @@ __int64 GrabOptimizator::grabWhole(ScreenDriver *grabber)
   LARGE_INTEGER timeBegin, timeEnd;
   bool timerResult1 = QueryPerformanceCounter(&timeBegin) != 0;
 
-  if (!grabber->grab()) {
+  if (!grabber->grabFb()) {
     throw Exception(_T("Grabber failed. Is it not ready?"));
   }
 
@@ -226,7 +226,7 @@ __int64 GrabOptimizator::grabOneRect(const Rect *rect,
   LARGE_INTEGER timeBegin, timeEnd;
   bool timerResult1 = QueryPerformanceCounter(&timeBegin) != 0;
 
-  if (!grabber->grab(rect)) {
+  if (!grabber->grabFb(rect)) {
     throw Exception(_T("Grabber failed. Is it not ready?"));
   }
 
@@ -280,7 +280,7 @@ __int64 GrabOptimizator::grabFragments(const std::vector<Rect> *rects,
 
   std::vector<Rect>::const_iterator iRect;
   for (iRect = rects->begin(); iRect < rects->end(); iRect++) {
-    if (!grabber->grab(&(*iRect))) {
+    if (!grabber->grabFb(&(*iRect))) {
       throw Exception(_T("Grabber failed. Is it not ready?"));
     }
   }

@@ -23,10 +23,10 @@
     <ClCompile Include="deflate.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="infblock.c">
+    <ClCompile Include="gzlib.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="infcodes.c">
+    <ClCompile Include="infback.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="inffast.c">
@@ -36,9 +36,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="inftrees.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="infutil.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="trees.c">
@@ -52,13 +49,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="crc32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="deflate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="infblock.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="infcodes.h">
+    <ClInclude Include="gzguts.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inffast.h">
@@ -67,10 +64,10 @@
     <ClInclude Include="inffixed.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inftrees.h">
+    <ClInclude Include="inflate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="infutil.h">
+    <ClInclude Include="inftrees.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="trees.h">

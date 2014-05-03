@@ -201,6 +201,23 @@ void UpdateKeeper::getUpdateContainer(UpdateContainer *updCont)
   *updCont = m_updateContainer;
 }
 
+bool UpdateKeeper::checkForUpdates(const Region *region)
+{
+  UpdateContainer updateContainer;
+  getUpdateContainer(&updateContainer);
+
+  Region resultRegion = updateContainer.changedRegion;
+  resultRegion.add(&updateContainer.copiedRegion);
+  resultRegion.intersect(region);
+
+  bool result = updateContainer.cursorPosChanged ||
+                updateContainer.cursorShapeChanged ||
+                updateContainer.screenSizeChanged ||
+                !resultRegion.isEmpty();
+
+  return result;
+}
+
 void UpdateKeeper::extract(UpdateContainer *updateContainer)
 {
   {

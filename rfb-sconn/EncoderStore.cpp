@@ -24,7 +24,9 @@
 
 #include "EncoderStore.h"
 
+#include "RreEncoder.h"
 #include "HextileEncoder.h"
+#include "ZrleEncoder.h"
 #include "TightEncoder.h"
 
 EncoderStore::EncoderStore(PixelConverter *pixelConverter, DataOutputStream *output)
@@ -103,17 +105,23 @@ Encoder *EncoderStore::validateEncoder(int encType)
 bool EncoderStore::encodingSupported(int encType)
 {
   return (encType == EncodingDefs::RAW ||
+          encType == EncodingDefs::RRE ||
           encType == EncodingDefs::HEXTILE ||
+          encType == EncodingDefs::ZRLE ||
           encType == EncodingDefs::TIGHT);
 }
 
 Encoder *EncoderStore::allocateEncoder(int encType) const
 {
   switch (encType) {
-  case EncodingDefs::HEXTILE:
-    return new HextileEncoder(m_pixelConverter, m_output);
   case EncodingDefs::TIGHT:
     return new TightEncoder(m_pixelConverter, m_output);
+  case EncodingDefs::ZRLE:
+    return new ZrleEncoder(m_pixelConverter, m_output);
+  case EncodingDefs::HEXTILE:
+    return new HextileEncoder(m_pixelConverter, m_output);
+  case EncodingDefs::RRE:
+    return new RreEncoder(m_pixelConverter, m_output);
   case EncodingDefs::RAW:
     return new Encoder(m_pixelConverter, m_output);
   default:

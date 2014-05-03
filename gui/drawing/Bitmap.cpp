@@ -31,9 +31,11 @@ Bitmap::Bitmap(int width, int height)
   int bpp = 32;
   size_t size = width * height * (bpp / 8);
   std::vector<unsigned char> bits(size);
-  memset(&bits.front(), 0, size);
-  // Create bitmap handle
-  m_bitmap = CreateBitmap(width, height, 1, bpp, &bits.front());
+  if (width != 0 && height != 0) {
+    memset(&bits.front(), 0, size);
+    // Create bitmap handle
+    m_bitmap = CreateBitmap(width, height, 1, bpp, &bits.front());
+  }
 }
 
 Bitmap::Bitmap(HDC dc, int width, int height)
@@ -56,13 +58,17 @@ Bitmap::~Bitmap()
 int Bitmap::getWidth() const
 {
   BITMAP bitmap;
-  GetObject(m_bitmap, sizeof(BITMAP), &bitmap);
+  if (GetObject(m_bitmap, sizeof(BITMAP), &bitmap) == 0) {
+    return 0;
+  }
   return bitmap.bmWidth;
 }
 
 int Bitmap::getHeight() const
 {
   BITMAP bitmap;
-  GetObject(m_bitmap, sizeof(BITMAP), &bitmap);
+  if (GetObject(m_bitmap, sizeof(BITMAP), &bitmap) == 0) {
+    return 0;
+  }
   return bitmap.bmHeight;
 }

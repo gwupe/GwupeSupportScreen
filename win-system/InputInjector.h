@@ -37,6 +37,7 @@ class InputInjector
 {
 public:
   InputInjector(bool ctrlAltDelEnabled, LogWriter *log);
+  ~InputInjector();
 
   // Toggles off all modifiers including the Delete key.
   void resetModifiers();

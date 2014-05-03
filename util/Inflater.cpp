@@ -53,7 +53,7 @@ void Inflater::setUnpackedSize(size_t size)
 void Inflater::inflate()
 {
   size_t avaliableOutput = m_unpackedSize + m_unpackedSize / 100 + 1024;
-  size_t prevTotalOut = m_zlibStream.total_out;
+  unsigned long prevTotalOut = m_zlibStream.total_out;
 
   // Check to overflow.
   unsigned int constrainedValue = (unsigned int)avaliableOutput;

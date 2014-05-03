@@ -48,6 +48,7 @@ public:
   static const TCHAR SHARE_DISPLAY[];
   static const TCHAR SHARE_WINDOW[];
   static const TCHAR SHARE_FULL[];
+  static const TCHAR SHARE_APP[];
 
   static const TCHAR SET_CONTROL_PASSWORD[];
   static const TCHAR SET_PRIMARY_VNC_PASSWORD[];
@@ -84,9 +85,11 @@ public:
   bool hasShareDisplay();
   bool hasShareWindow();
   bool hasShareFull();
+  bool hasShareApp();
   unsigned char getShareDisplayNumber();
   void getShareWindowName(StringStorage *out);
   Rect getShareRect();
+  unsigned int getSharedAppProcessId();
 
   const TCHAR *getPrimaryVncPassword() const;
   const TCHAR *getControlPassword() const;
@@ -96,6 +99,7 @@ public:
 private:
   void parseRectCoordinates(const StringStorage *strCoord);
   void parseDisplayNumber(const StringStorage *strDispNumber);
+  void parseProcessId(const StringStorage *str);
 
   StringStorage m_vncPassword;
   StringStorage m_controlPassword;
@@ -106,6 +110,7 @@ private:
   Rect m_shareRect;
   unsigned char m_displayNumber;
   StringStorage m_windowHeaderName;
+  unsigned int m_sharedAppProcessId;
 };
 
 #endif

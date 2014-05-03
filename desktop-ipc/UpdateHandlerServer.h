@@ -26,9 +26,10 @@
 #define __UPDATEHANDLERSERVER_H__
 
 #include "DesktopServerProto.h"
-#include "desktop/LocalUpdateHandler.h"
+#include "desktop/UpdateHandlerImpl.h"
 #include "DesktopSrvDispatcher.h"
 #include "log-writer/LogWriter.h"
+#include "desktop/Win32ScreenDriverFactory.h"
 
 class UpdateHandlerServer: public DesktopServerProto, public ClientListener,
                            public UpdateListener
@@ -54,9 +55,11 @@ protected:
   void receiveFullReqReg(BlockingGate *backGate);
   void receiveExcludingReg(BlockingGate *backGate);
 
+  Win32ScreenDriverFactory m_scrDriverFactory;
+
   PixelFormat m_oldPf;
 
-  LocalUpdateHandler *m_updateHandler;
+  UpdateHandlerImpl *m_updateHandler;
   AnEventListener *m_extTerminationListener;
 
   LogWriter *m_log;

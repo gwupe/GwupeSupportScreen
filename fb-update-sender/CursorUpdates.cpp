@@ -40,9 +40,20 @@ void CursorUpdates::update(const EncodeOptions *encodeOptions,
                            UpdateContainer *updCont,
                            bool fullRegReq,
                            const Rect *viewPort,
+                           bool shareOnlyApp,
+                           const Region *shareAppRegion,
                            FrameBuffer *fb,
                            CursorShape *cursorShape)
 {
+  // Check cursor events. If they are outside of shared region then ignore they.
+  if (shareOnlyApp) {
+    bool inside = shareAppRegion->isPointInside(updCont->cursorPos.x, updCont->cursorPos.y);
+    if (!inside) {
+      updCont->cursorPosChanged = false;
+      updCont->cursorShapeChanged = false;
+    }
+  }
+
   bool richEnabled = encodeOptions->richCursorEnabled();
   bool posEnabled = encodeOptions->pointerPosEnabled();
 
@@ -146,7 +157,7 @@ void CursorUpdates::drawCursor(UpdateContainer *updCont, FrameBuffer *fb)
   rect.setLocation(m_backgroundPos.x, m_backgroundPos.y);
 
   fb->overlay(&rect,
-              m_cursorShape.getPixels(), rect.left, rect.top,
+              m_cursorShape.getPixels(), 0, 0,
               m_cursorShape.getMask());
 }
 

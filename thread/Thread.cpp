@@ -62,7 +62,11 @@ void Thread::initByDerived()
 
 bool Thread::wait()
 {
-  return (WaitForSingleObject(m_hThread, INFINITE) != WAIT_FAILED);
+  if (m_active) {
+    return (WaitForSingleObject(m_hThread, INFINITE) != WAIT_FAILED);
+  } else {
+    return true;
+  }
 }
 
 // FIXME: not thread-safe (m_active).

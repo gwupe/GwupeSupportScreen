@@ -43,22 +43,31 @@ void IpAccessControl::serialize(DataOutputStream *output)
 
 void IpAccessControl::deserialize(DataInputStream *input)
 {
-  clear();
+  for (iterator i = begin(); i != end(); ++i) {
+    delete *i;
+  }
 
   size_t count = input->readUInt32();
+  resize(count);
 
   StringStorage string;
 
-  for (size_t i = 0; i < count; i++) {
+  for (iterator i = begin(); i != end(); ++i) {
     input->readUTF8(&string);
 
+    // Here is would be good to use auto_ptr, but
+    // auto_ptr is not compatible with vector.
     IpAccessRule *rule = new IpAccessRule();
-
-    if (!IpAccessRule::parse(string.getString(), rule)) {
+    try {
+      if (!IpAccessRule::parse(string.getString(), rule)) {
+        throw Exception(_T("Parsing of ip access rule is failed."));
+      }
+    } catch (...) {
       delete rule;
-      continue;
+      rule = 0;
+      throw;
     }
 
-    push_back(rule);
+    *i = rule;
   }
 }

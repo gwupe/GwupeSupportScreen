@@ -56,8 +56,10 @@ public:
   void setScale(int scale);
   // it returns the image width and height considering scale
   Rect getViewerGeometry();
-  // it returns the image width, height and number of bits per pixel
-  void getServerGeometry(int *width, int *height, int *pixelsize);
+  // it returns the image width and height.
+  Rect getFrameBufferGeometry();
+  // it return size of server frame buffer and pixelsize.
+  void getServerGeometry(Rect *rect, int *pixelsize);
 
   void setConnected();
   void setViewerCore(RemoteViewerCore *viewerCore);
@@ -77,9 +79,9 @@ public:
   // this function sends to remote viewer core the combination
   // Ctrl + Alt + Del
   void sendCtrlAltDel();
-  // inform the class we in full-screen mode or not
-  // the difference is that in full-screen don't draw the scrollbars
-  void setFullScreen(bool isFullScreen);
+
+  // Set function for m_winKeyIgnore.
+  void setWinKeyIgnore(bool winKeyIgnore) { m_rfbKeySym->setWinKeyIgnore(winKeyIgnore); }
 
 protected:
   //
@@ -145,6 +147,9 @@ protected:
   // frame buffer
   LocalMutex m_bufferLock;
   DibFrameBuffer m_framebuffer;
+  // This variable save server dimension.
+  // Dimension of m_framebuffer can be large m_serverDimension.
+  Dimension m_serverDimension;
 
   // clipboard
   WinClipboard m_clipboard;
@@ -156,7 +161,6 @@ protected:
   RemoteViewerCore *m_viewerCore;
   ConnectionConfig *m_conConf;
   bool m_isBackgroundDirty;
-  bool m_isFullScreen;
 
 private:
   void doDraw(DeviceContext *dc);

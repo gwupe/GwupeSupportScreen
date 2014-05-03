@@ -25,7 +25,6 @@
 #include "DesktopClientImpl.h"
 #include "server-config-lib/Configurator.h"
 #include "desktop-ipc/UpdateHandlerClient.h"
-#include "LocalUpdateHandler.h"
 #include "WindowsInputBlocker.h"
 #include "desktop-ipc/UserInputClient.h"
 #include "SasUserInput.h"
@@ -51,37 +50,54 @@ DesktopClientImpl::DesktopClientImpl(ClipboardListener *extClipListener,
   m_log->info(_T("Creating DesktopClientImpl"));
 
   try {
+    m_log->debug(_T("DesktopClientImpl: Try to initialize DesktopServerWatcher"));
     m_deskServWatcher = new DesktopServerWatcher(this, m_log);
 
     // Transport initialization
+    m_log->debug(_T("DesktopClientImpl: Initializing ReconnectingChannel(s)..."));
     m_clToSrvChan = new ReconnectingChannel(60000, m_log);
     m_srvToClChan = new ReconnectingChannel(60000, m_log);
 
+    // At this point the all DesktopServerWatcher's callback resources is initialized.
+    m_log->debug(_T("DesktopClientImpl: Resuming DesktopServerWatcher"));
+    m_deskServWatcher->resume();
+
+    m_log->debug(_T("DesktopClientImpl: Creating BlockingGate wrappers for the ReconnectingChannel(s)"));
     m_clToSrvGate = new BlockingGate(m_clToSrvChan);
     m_srvToClGate = new BlockingGate(m_srvToClChan);
 
+    m_log->debug(_T("DesktopClientImpl: Initializing DesktopSrvDispatcher"));
     m_dispatcher = new DesktopSrvDispatcher(m_srvToClGate, this, m_log);
 
+    m_log->debug(_T("DesktopClientImpl: Initializing UpdateHandlerClient..."));
     m_updateHandler = new UpdateHandlerClient(m_clToSrvGate, m_dispatcher,
                                               this, m_log);
 
+    m_log->debug(_T("DesktopClientImpl: Initializing UserInputClient..."));
     UserInputClient *userInputClient =
       new UserInputClient(m_clToSrvGate, m_dispatcher, this);
     m_userInputClient = userInputClient;
+    m_log->debug(_T("DesktopClientImpl: Initializing SasUserInput..."));
     m_userInput = new SasUserInput(userInputClient, m_log);
 
+    m_log->debug(_T("DesktopClientImpl: Initializing DesktopConfigClient..."));
     m_deskConf = new DesktopConfigClient(m_clToSrvGate);
+    m_log->debug(_T("DesktopClientImpl: Initializing GateKicker..."));
     m_gateKicker = new GateKicker(m_clToSrvGate);
     // Start dispatcher after handler registrations
+    m_log->debug(_T("DesktopClientImpl: Resuming DesktopSrvDispatcher"));
     m_dispatcher->resume();
+    m_log->debug(_T("DesktopClientImpl: Calling onConfigReload(0)"));
     onConfigReload(0);
 
+    m_log->debug(_T("DesktopClientImpl: Registering as a listener in the Configurator"));
     Configurator::getInstance()->addListener(this);
   } catch (Exception &ex) {
     m_log->error(_T("Exception during DesktopClientImpl creaion: %s"), ex.getMessage());
     freeResource();
     throw;
   }
+  m_log->debug(_T("DesktopClientImpl: Resuming self thread"));
   resume();
 }
 

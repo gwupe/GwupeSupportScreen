@@ -23,8 +23,6 @@
 //
 
 #include "IpAccessRule.h"
-#include "Configurator.h"
-#include "util/CommonHeader.h"
 #include "util/AnsiStringStorage.h"
 
 IpAccessRule::IpAccessRule()

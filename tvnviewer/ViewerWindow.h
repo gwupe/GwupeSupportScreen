@@ -40,9 +40,11 @@
 #include "viewer-core/VncAuthentication.h"
 #include "win-system/SystemInformation.h"
 #include "win-system/WindowsApplication.h"
+#include "win-system/WinHooks.h"
 
 class ViewerWindow : public BaseWindow,
-                     public CoreEventsAdapter
+                     public CoreEventsAdapter,
+                     private HookEventListener
 {
 public:
   ViewerWindow(WindowsApplication *application,
@@ -173,7 +175,6 @@ protected:
   // Flag is set, if viewer instance is stopped.
   // Destructor of ViewerWindow may be called, if this flag is true.
   bool m_stopped;
-
 private:
   vector<int> m_standardScale;
   void changeCursor(int type);
@@ -194,6 +195,11 @@ private:
   void adjustWindowSize();
   StringStorage formatWindowName() const;
   void updateKeyState();
+
+  // onHookProc function implementation of HookEventListener base abstract class.
+  virtual LRESULT onHookProc(int code, WPARAM wParam, LPARAM lParam);
+  WinHooks m_winHooks;
+  bool m_hooksEnabledFirstTime;
 };
 
 #endif

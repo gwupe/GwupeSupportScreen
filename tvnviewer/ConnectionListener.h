@@ -44,6 +44,7 @@ public:
   // this method return pointer to new listening connection, if him is exist, and 0 if isn't
   SocketIPv4 *getNewConnection();
 
+  UINT16 getBindPort() const;
 protected:
   void onAcceptConnection(SocketIPv4 *socket);
 

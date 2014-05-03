@@ -222,7 +222,7 @@ void ViewerCmdLine::parseOptionsFile()
   StringStorage port;
   if (sm.getString(_T("port"), &port)) {
     StringStorage hostString;
-    hostString.format(_T("%s:%s"), host.getString(), port.getString());
+    hostString.format(_T("%s::%s"), host.getString(), port.getString());
     m_conData->setHost(&hostString);
   } else {
     m_conData->setHost(&host);

@@ -33,6 +33,8 @@ DynamicLibrary *WTS::m_kernel32Library = 0;
 DynamicLibrary *WTS::m_wtsapi32Library = 0;
 pWTSGetActiveConsoleSessionId WTS::m_WTSGetActiveConsoleSessionId = 0;
 pWTSQueryUserToken WTS::m_WTSQueryUserToken = 0;
+pWTSQuerySessionInformation WTS::m_WTSQuerySessionInformation = 0;
+pWTSFreeMemory WTS::m_WTSFreeMemory = 0;
 
 volatile bool WTS::m_initialized = false;
 
@@ -82,6 +84,30 @@ void WTS::queryConsoleUserToken(HANDLE *token, LogWriter *log) throw(SystemExcep
       throw SystemException(_T("Could not duplicate token"));
     }
   }
+}
+
+bool WTS::getCurrentUserName(StringStorage *userName, LogWriter *log)
+{
+  if (m_WTSQuerySessionInformation == 0) {
+    return false;
+  }
+
+  LPTSTR *buffer;
+  DWORD byteCount;
+  DWORD sessionId = getActiveConsoleSessionId(log);
+  if (m_WTSQuerySessionInformation(WTS_CURRENT_SERVER_HANDLE, sessionId,
+                                   WTSUserName, &buffer, &byteCount) == 0) {
+    return false;
+  }
+  userName->setString((TCHAR *)buffer);
+  wtsFreeMemory(buffer);
+
+  return true;
+}
+
+void WTS::wtsFreeMemory(void *buffer)
+{
+  m_WTSFreeMemory(buffer);
 }
 
 void WTS::defineConsoleUserProcessId(DWORD userProcessId)
@@ -171,6 +197,8 @@ void WTS::initialize(LogWriter *log)
   try {
     m_wtsapi32Library = new DynamicLibrary(_T("Wtsapi32.dll"));
     m_WTSQueryUserToken = (pWTSQueryUserToken)m_wtsapi32Library->getProcAddress("WTSQueryUserToken");
+    m_WTSQuerySessionInformation = (pWTSQuerySessionInformation)m_wtsapi32Library->getProcAddress("WTSQuerySessionInformation");
+    m_WTSFreeMemory = (pWTSFreeMemory)m_wtsapi32Library->getProcAddress("WTSFreeMemory");
   } catch (Exception &e) {
     log->error(_T("Can't load the Wtsapi32.dll library: %s"), e.getMessage());
   }

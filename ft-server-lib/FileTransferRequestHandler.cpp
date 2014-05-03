@@ -583,7 +583,9 @@ void FileTransferRequestHandler::uploadDataRequested()
   compressedSize = m_input->readUInt32();
   uncompressedSize = m_input->readUInt32();
   std::vector<char> buffer(compressedSize);
-  m_input->readFully(&buffer.front(), compressedSize);
+  if (compressedSize != 0) {
+    m_input->readFully(&buffer.front(), compressedSize);
+  }
 
   m_log->info(_T("upload data (cs = %d, us = %d) requested"), compressedSize, uncompressedSize);
 
@@ -593,18 +595,20 @@ void FileTransferRequestHandler::uploadDataRequested()
     throw FileTransferException(_T("No active upload at the moment"));
   }
 
-  if (compressionLevel == 0) {
-    DataOutputStream dataOutStream(m_fileOutputStream);
-    dataOutStream.writeFully(&buffer.front(), uncompressedSize);
-  } else {
-    m_inflater.setInput(&buffer.front(), compressedSize);
-    m_inflater.setUnpackedSize(uncompressedSize);
-    m_inflater.inflate();
+  if (compressedSize != 0) {
+    if (compressionLevel == 0) {
+      DataOutputStream dataOutStream(m_fileOutputStream);
+      dataOutStream.writeFully(&buffer.front(), uncompressedSize);
+    } else {
+      m_inflater.setInput(&buffer.front(), compressedSize);
+      m_inflater.setUnpackedSize(uncompressedSize);
+      m_inflater.inflate();
 
-    DataOutputStream dataOutStream(m_fileOutputStream);
+      DataOutputStream dataOutStream(m_fileOutputStream);
 
-    dataOutStream.writeFully(m_inflater.getOutput(), m_inflater.getOutputSize());
-  } // if using compression
+      dataOutStream.writeFully(m_inflater.getOutput(), m_inflater.getOutputSize());
+    } // if using compression
+  }
 
   {
     AutoLock l(m_output);
@@ -778,9 +782,11 @@ void FileTransferRequestHandler::downloadDataRequested()
   DWORD read = 0;
 
   try {
-    size_t portion = m_fileInputStream->read(&buffer.front(), dataSize);
-    read = (DWORD)portion;
-    _ASSERT(read == portion);
+    if (dataSize != 0) {
+      size_t portion = m_fileInputStream->read(&buffer.front(), dataSize);
+      read = (DWORD)portion;
+      _ASSERT(read == portion);
+    }
   } catch (EOFException) {
 
     //
@@ -819,10 +825,12 @@ void FileTransferRequestHandler::downloadDataRequested()
   uncompressedSize = read;
 
   if (compressionLevel != 0) {
-    m_deflater.setInput(&buffer.front(), uncompressedSize);
-    m_deflater.deflate();
-    _ASSERT((UINT32)m_deflater.getOutputSize() == m_deflater.getOutputSize());
-    compressedSize = (UINT32)m_deflater.getOutputSize();
+    if (dataSize != 0) {
+      m_deflater.setInput(&buffer.front(), uncompressedSize);
+      m_deflater.deflate();
+      _ASSERT((UINT32)m_deflater.getOutputSize() == m_deflater.getOutputSize());
+      compressedSize = (UINT32)m_deflater.getOutputSize();
+    }
   }
 
   //
@@ -837,7 +845,9 @@ void FileTransferRequestHandler::downloadDataRequested()
   m_output->writeUInt32(uncompressedSize);
 
   if (compressionLevel == 0) {
-    m_output->writeFully(&buffer.front(), uncompressedSize);
+    if (dataSize != 0) {
+      m_output->writeFully(&buffer.front(), uncompressedSize);
+    }
   } else {
     m_output->writeFully((const char *)m_deflater.getOutput(), compressedSize);
   }
@@ -880,7 +890,7 @@ bool FileTransferRequestHandler::getDirectorySize(const TCHAR *pathname, UINT64 
     return false;
   }
 
-  if (filesCount) {
+  if (filesCount != 0) {
     std::vector<StringStorage> fileNames(filesCount);
 
     //

@@ -32,7 +32,8 @@
 #include <crtdbg.h>
 
 SocketIPv4::SocketIPv4()
-: m_localAddr(NULL), m_peerAddr(NULL), m_isBound(false)
+: m_localAddr(NULL), m_peerAddr(NULL), m_isBound(false),
+  m_wsaStartup(1, 2)
 {
   m_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   m_isClosed = false;

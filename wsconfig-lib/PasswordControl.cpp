@@ -100,6 +100,10 @@ void PasswordControl::setCryptedPassword(const char *cryptedPass)
 
 const char *PasswordControl::getCryptedPassword() const
 {
+  if (m_cryptedPassword.empty()) {
+    return 0;
+  }
+
   return &m_cryptedPassword.front();
 }
 

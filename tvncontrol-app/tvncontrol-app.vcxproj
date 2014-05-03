@@ -260,7 +260,6 @@
     <ClCompile Include="ControlGate.cpp" />
     <ClCompile Include="ControlMessage.cpp" />
     <ClCompile Include="ControlPipeName.cpp" />
-    <ClCompile Include="ControlProto.cpp" />
     <ClCompile Include="ControlProxy.cpp" />
     <ClCompile Include="ControlTrayIcon.cpp" />
     <ClCompile Include="DisconnectAllCommand.cpp" />
@@ -273,6 +272,7 @@
     <ClCompile Include="RemoteException.cpp" />
     <ClCompile Include="RfbClientInfo.cpp" />
     <ClCompile Include="SetPasswordsDialog.cpp" />
+    <ClCompile Include="ShareAppCommand.cpp" />
     <ClCompile Include="ShareDisplayCommand.cpp" />
     <ClCompile Include="ShareFullCommand.cpp" />
     <ClCompile Include="SharePrimaryCommand.cpp" />
@@ -312,6 +312,7 @@
     <ClInclude Include="RemoteException.h" />
     <ClInclude Include="RfbClientInfo.h" />
     <ClInclude Include="SetPasswordsDialog.h" />
+    <ClInclude Include="ShareAppCommand.h" />
     <ClInclude Include="ShareDisplayCommand.h" />
     <ClInclude Include="ShareFullCommand.h" />
     <ClInclude Include="SharePrimaryCommand.h" />

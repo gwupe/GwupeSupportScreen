@@ -41,19 +41,19 @@
 #include "IpAccessControlDialog.h"
 #include "VideoRegionsConfigDialog.h"
 
-#include "util/Command.h"
+#include "tvncontrol-app/ControlCommand.h"
 
 class ConfigDialog : public BaseDialog
 {
 public:
-  ConfigDialog(bool forService, Command *reloadConfigCommand);
+  ConfigDialog(bool forService, ControlCommand *reloadConfigCommand);
   ConfigDialog(bool forService);
   ConfigDialog();
   virtual ~ConfigDialog();
 
   void updateApplyButtonState();
 
-  void setConfigReloadCommand(Command *command);
+  void setConfigReloadCommand(ControlCommand *command);
   void setServiceFlag(bool serviceFlag);
 
   bool isConfiguringService();
@@ -93,7 +93,7 @@ protected:
   // Other members
   bool m_isConfiguringService;
 
-  Command *m_reloadConfigCommand;
+  ControlCommand *m_reloadConfigCommand;
 
   int m_lastSelectedTabIndex;
 };

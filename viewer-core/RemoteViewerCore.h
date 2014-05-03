@@ -122,6 +122,7 @@ public:
                    Logger *logger = 0,
                    bool sharedFlag = true);
 
+  // FIX DOCUMENTATION: Clarify differents between the constructor with sockets and gates.
   //
   // This constructor expects a connected TCP socket. For example, it can be
   // used for reverse connections (when servers connect to viewers).
@@ -131,6 +132,8 @@ public:
                    Logger *logger = 0,
                    bool sharedFlag = true);
 
+  // FIX DOCUMENTATION: What objects will be destroyed? Will a socket object be destroyed
+  // which has been passed with the constructor?
   //
   // The destructor.
   //

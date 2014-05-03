@@ -44,6 +44,14 @@ InputInjector::InputInjector(bool ctrlAltDelEnabled, LogWriter *log)
   resetModifiers();
 }
 
+InputInjector::~InputInjector()
+{
+  try {
+    resetModifiers();
+  } catch (...) {
+  }
+}
+
 void InputInjector::injectKeyPress(BYTE vkCode)
 {
   injectKeyEvent(vkCode, false);

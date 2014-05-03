@@ -48,7 +48,7 @@ void Deflater::deflate()
 {
   size_t reserve = m_inputSize / 100 + 1024;
   size_t avaliableOutput = m_inputSize + reserve;
-  size_t prevTotalOut = m_zlibStream.total_out;
+  unsigned long prevTotalOut = m_zlibStream.total_out;
 
   unsigned int constrainedValue = (unsigned int)avaliableOutput;
   _ASSERT(avaliableOutput == constrainedValue);

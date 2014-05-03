@@ -39,20 +39,13 @@ DesktopWindow::DesktopWindow(LogWriter *logWriter, ConnectionConfig *conConf)
   m_altDown(false),
   m_previousMousePos(-1, -1),
   m_previousMouseState(0),
-  m_isBackgroundDirty(false),
-  m_isFullScreen(false)
+  m_isBackgroundDirty(false)
 {
   m_rfbKeySym = std::auto_ptr<RfbKeySym>(new RfbKeySym(this, m_logWriter));
 }
 
 DesktopWindow::~DesktopWindow()
 {
-}
-
-void DesktopWindow::setFullScreen(bool isFullScreen)
-{
-  m_isFullScreen = isFullScreen;
-  m_sbar.setVirtualScroll(m_isFullScreen);
 }
 
 void DesktopWindow::setConnected()
@@ -83,7 +76,7 @@ void DesktopWindow::onPaint(DeviceContext *dc, PAINTSTRUCT *paintStruct)
       if (!m_clientArea.isEmpty()) {
         doDraw(dc);
       }
-    } catch (Exception &ex) {
+    } catch (const Exception &ex) {
       m_logWriter->error(_T("Error in onPaint: %s"), ex.getMessage());
     }
   }
@@ -464,7 +457,17 @@ void DesktopWindow::drawImage(const RECT *src, const RECT *dst)
   Rect rc_dest(dst);
 
   AutoLock al(&m_bufferLock);
-  m_framebuffer.stretchFromDibSection(&rc_dest, &rc_src);
+  
+  if ((src->right - src->left) == (dst->right - dst->left) &&
+     (src->bottom - src->top) == (dst->bottom - dst->top) &&
+     src->left == dst->left &&
+     src->right == dst->right &&
+     src->top == dst->top &&
+     src->bottom == dst->bottom) {
+    m_framebuffer.blitFromDibSection(&rc_dest);
+  } else {
+    m_framebuffer.stretchFromDibSection(&rc_dest, &rc_src);
+  }
 }
 
 bool DesktopWindow::onSize(WPARAM wParam, LPARAM lParam) 
@@ -511,6 +514,8 @@ void DesktopWindow::setNewFramebuffer(const FrameBuffer *framebuffer)
   {
     // FIXME: Nested locks should not be used.
     AutoLock al(&m_bufferLock);
+
+    m_serverDimension = dimension;
     if (!dimension.isEmpty()) {
       // the width and height should be aligned to 4
       int alignWidth = (dimension.width + 3) / 4;
@@ -606,16 +611,19 @@ Rect DesktopWindow::getViewerGeometry()
   return viewerRect;
 }
 
-void DesktopWindow::getServerGeometry(int *width, int *height, int *pixelsize)
+Rect DesktopWindow::getFrameBufferGeometry()
 {
   AutoLock al(&m_bufferLock);
-  if (width) {
-    *width = m_framebuffer.getDimension().width;
+  return m_framebuffer.getDimension().getRect();
+}
+
+void DesktopWindow::getServerGeometry(Rect *rect, int *pixelsize)
+{
+  AutoLock al(&m_bufferLock);
+  if (rect != 0) {
+    *rect = m_serverDimension.getRect();
   }
-  if (height) {
-    *height = m_framebuffer.getDimension().height;
-  }
-  if (pixelsize) {
+  if (pixelsize != 0) {
     *pixelsize = m_framebuffer.getBitsPerPixel();
   }
 }
@@ -657,6 +665,10 @@ void DesktopWindow::sendCtrlAltDel()
 
 void DesktopWindow::sendKeyboardEvent(bool downFlag, UINT32 key)
 {
+  if (m_conConf->isViewOnly()) {
+    return;
+  }
+
   // If pointer to viewer core is 0, then exit.
   if (m_viewerCore == 0) {
     return;
@@ -673,6 +685,10 @@ void DesktopWindow::sendKeyboardEvent(bool downFlag, UINT32 key)
 
 void DesktopWindow::sendPointerEvent(UINT8 buttonMask, const Point *position)
 {
+  if (m_conConf->isViewOnly()) {
+    return;
+  }
+
   // If pointer to viewer core is 0, then exit.
   if (m_viewerCore == 0) {
     return;
@@ -689,6 +705,10 @@ void DesktopWindow::sendPointerEvent(UINT8 buttonMask, const Point *position)
 
 void DesktopWindow::sendCutTextEvent(const StringStorage *cutText)
 {
+  if (!m_conConf->isClipboardEnabled()) {
+    return;
+  }
+
   // If pointer to viewer core is 0, then exit.
   if (m_viewerCore == 0) {
     return;
@@ -702,4 +722,3 @@ void DesktopWindow::sendCutTextEvent(const StringStorage *cutText)
                         exception.getMessage());
   }
 }
-

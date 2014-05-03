@@ -72,6 +72,7 @@ private:
   void onDARadioButtonClick(int number);
   void onLogForAllUsersClick();
   void onUseControlAuthClick();
+  void onRepeatControlAuthClick();
   void onChangeControlPasswordClick();
   void onUnsetControlPasswordClick();
 
@@ -92,6 +93,7 @@ protected:
   TextBox m_logLevel;
   TextBox m_logPathTB;
   CheckBox m_useControlAuth;
+  CheckBox m_repeatControlAuth;
   CheckBox m_shared[5];
   CheckBox m_logForAllUsers;
   SpinControl m_logSpin;

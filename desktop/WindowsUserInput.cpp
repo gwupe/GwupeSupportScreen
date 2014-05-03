@@ -214,3 +214,30 @@ HWND WindowsUserInput::getWindowHandleByName(const StringStorage *windowName)
 {
   return WindowFinder::findFirstWindowByName(windowName);
 }
+
+void WindowsUserInput::getApplicationRegion(unsigned int procId, Region *region)
+{
+  region->clear();
+  HWND hForegr = GetWindow(GetForegroundWindow(), GW_HWNDLAST);
+
+  RECT winRect;
+  Rect rect;
+  while (hForegr != NULL) {
+    GetWindowRect(hForegr, &winRect);
+
+    DWORD style = GetWindowLong(hForegr, GWL_STYLE);
+    DWORD procForegr;
+    GetWindowThreadProcessId(hForegr, &procForegr);
+    if (style & WS_VISIBLE) {
+      rect.fromWindowsRect(&winRect);
+      if (procForegr == procId) {
+        region->addRect(&rect);
+      } else {
+        region->subtract(&Region(&rect));
+      }
+    }
+    hForegr = GetWindow(hForegr, GW_HWNDPREV);
+  }
+  region->translate(-GetSystemMetrics(SM_XVIRTUALSCREEN),
+                    -GetSystemMetrics(SM_YVIRTUALSCREEN));
+}

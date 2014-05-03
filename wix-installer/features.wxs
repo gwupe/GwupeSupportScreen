@@ -19,6 +19,7 @@
         <ComponentRef Id='tvnserverFirewallException'/>
         <ComponentRef Id='LogFolderPermissions'/>
       </Feature>
+      <?ifndef VIEWER_FREE ?>
       <Feature Id='Viewer'
                Title='TightVNC Viewer'
                Description='TightVNC Viewer is used to view and control remote computers.'
@@ -27,6 +28,7 @@
         <ComponentRef Id='ViewerFileAssoc' />
         <ComponentRef Id='TvnviewerFirewallException'/>
       </Feature>
+      <?endif?>
       <!-- Always installing component -->
       <ComponentRef Id='UrlComponent'/>
       <ComponentRef Id='LicenseFileComponent'/>

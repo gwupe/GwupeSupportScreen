@@ -44,6 +44,12 @@
     <ClCompile Include="PixelConverter.cpp">
       <Filter>Encoders</Filter>
     </ClCompile>
+    <ClCompile Include="StandardPixelFormatFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TunnelDefs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AuthDefs.h">
@@ -81,6 +87,12 @@
     </ClInclude>
     <ClInclude Include="PixelConverter.h">
       <Filter>Encoders</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardPixelFormatFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TunnelDefs.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
