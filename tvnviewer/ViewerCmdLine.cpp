@@ -250,7 +250,7 @@ void ViewerCmdLine::parsePassword()
 void ViewerCmdLine::parseUserName()
 {
   if (isPresent(USERNAME)) {
-    m_conData->setBlitsmeUserName(&m_options[USERNAME]);
+    m_conData->setGwupeUserName(&m_options[USERNAME]);
   }
 }
 void ViewerCmdLine::parseEncoding()

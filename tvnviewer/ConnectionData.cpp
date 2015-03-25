@@ -48,11 +48,11 @@ ConnectionData::ConnectionData(const ConnectionData &connectionData)
   if (m_isSetPassword) {
     m_defaultPassword = connectionData.m_defaultPassword;
   }
-  if (connectionData.m_bmUserName.isEmpty()) {
-	m_bmUserName.setString(_T("Default User"));
+  if (connectionData.m_gwupeUserName.isEmpty()) {
+	m_gwupeUserName.setString(_T("Default User"));
   }
   else {
-	m_bmUserName = connectionData.m_bmUserName;
+	m_gwupeUserName = connectionData.m_gwupeUserName;
   }
 }
 
@@ -156,14 +156,14 @@ void ConnectionData::setPlainPassword(const StringStorage *password)
   m_isSetPassword = true;
 }
 // Added: JH 28 March 2013 - not sure if this belongs here but will keep here for now
-void ConnectionData::setBlitsmeUserName(const StringStorage *username)
+void ConnectionData::setGwupeUserName(const StringStorage *username)
 {
-	m_bmUserName = *username;
+	m_gwupeUserName = *username;
 }
 
-StringStorage ConnectionData::getBlitsmeUserName()
+StringStorage ConnectionData::getGwupeUserName()
 {
-	return m_bmUserName;
+	return m_gwupeUserName;
 }
 
 StringStorage ConnectionData::getHost() const

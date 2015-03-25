@@ -1216,7 +1216,7 @@ StringStorage ViewerWindow::formatWindowName() const
   StringStorage windowName;
   if (!desktopName.isEmpty()) {
 //    windowName.format(_T("%s - %s"), desktopName.getString(), ProductNames::VIEWER_PRODUCT_NAME);
-	  windowName.format(_T("%s - %s"), m_conData->getBlitsmeUserName().getString(), ProductNames::VIEWER_PRODUCT_NAME);
+	  windowName.format(_T("%s - %s"), m_conData->getGwupeUserName().getString(), ProductNames::VIEWER_PRODUCT_NAME);
   } else {
     windowName.format(_T("%s"), ProductNames::VIEWER_PRODUCT_NAME);
   }

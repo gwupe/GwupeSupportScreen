@@ -24,33 +24,33 @@
 
 #include "NamingDefs.h"
 #ifdef _DEBUG
-const TCHAR ProductNames::PRODUCT_NAME[] = _T("BlitsMe_Dev");
-const TCHAR ProductNames::VIEWER_PRODUCT_NAME[] = _T("BlitsMe_Dev Support Screen");
+const TCHAR ProductNames::PRODUCT_NAME[] = _T("Gwupe_Dev");
+const TCHAR ProductNames::VIEWER_PRODUCT_NAME[] = _T("Gwupe_Dev Support Screen");
 
-const TCHAR LogNames::VIEWER_LOG_FILE_STUB_NAME[] = _T("bmss_Dev");
-const TCHAR LogNames::LOG_DIR_NAME[] = _T("BlitsMe_Dev");
+const TCHAR LogNames::VIEWER_LOG_FILE_STUB_NAME[] = _T("gwupess_Dev");
+const TCHAR LogNames::LOG_DIR_NAME[] = _T("Gwupe_Dev");
 
 const TCHAR RegistryPaths::VIEWER_PATH[] = _T("Software\\BlitsMe_Dev\\Viewer");
 
 const TCHAR ApplicationNames::WINDOW_CLASS_NAME[] = 
-  _T("BmdvApplicationClass");
+  _T("GwupedvApplicationClass");
 
-const TCHAR WindowNames::TVN_WINDOW_CLASS_NAME[] = _T("BMDVWindowClass");
-const TCHAR WindowNames::TVN_WINDOW_TITLE_NAME[] = _T("BlitsMe_Dev Support Screen");
+const TCHAR WindowNames::TVN_WINDOW_CLASS_NAME[] = _T("GwupeDVWindowClass");
+const TCHAR WindowNames::TVN_WINDOW_TITLE_NAME[] = _T("Gwupe_Dev Support Screen");
 const TCHAR WindowNames::TVN_SUB_WINDOW_TITLE_NAME[] = _T("Viewer");
 #else
-const TCHAR ProductNames::PRODUCT_NAME[] = _T("BlitsMe");
-const TCHAR ProductNames::VIEWER_PRODUCT_NAME[] = _T("BlitsMe Support Screen");
+const TCHAR ProductNames::PRODUCT_NAME[] = _T("Gwupe");
+const TCHAR ProductNames::VIEWER_PRODUCT_NAME[] = _T("Gwupe Support Screen");
 
-const TCHAR LogNames::VIEWER_LOG_FILE_STUB_NAME[] = _T("bmss");
-const TCHAR LogNames::LOG_DIR_NAME[] = _T("TightVNC");
+const TCHAR LogNames::VIEWER_LOG_FILE_STUB_NAME[] = _T("gwupess");
+const TCHAR LogNames::LOG_DIR_NAME[] = _T("Gwupe");
 
 const TCHAR RegistryPaths::VIEWER_PATH[] = _T("Software\\BlitsMe\\Viewer");
 
 const TCHAR ApplicationNames::WINDOW_CLASS_NAME[] = 
-  _T("BmvApplicationClass");
+  _T("GwupevApplicationClass");
 
-const TCHAR WindowNames::TVN_WINDOW_CLASS_NAME[] = _T("BMVWindowClass");
-const TCHAR WindowNames::TVN_WINDOW_TITLE_NAME[] = _T("BlitsMe Support Screen");
+const TCHAR WindowNames::TVN_WINDOW_CLASS_NAME[] = _T("GwupeVWindowClass");
+const TCHAR WindowNames::TVN_WINDOW_TITLE_NAME[] = _T("Gwupe Support Screen");
 const TCHAR WindowNames::TVN_SUB_WINDOW_TITLE_NAME[] = _T("Viewer");
 #endif

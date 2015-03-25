@@ -64,9 +64,9 @@ public:
   void setCryptedPassword(const StringStorage *password);
   bool isSetPassword() const;
   void resetPassword();
-// Added: JH 28 March 2013 as part of Blitsme phase 1 update
-  void setBlitsmeUserName(const StringStorage *username);
-  StringStorage getBlitsmeUserName();
+// Added: JH 28 March 2013 as part of Gwupe phase 1 update
+  void setGwupeUserName(const StringStorage *username);
+  StringStorage getGwupeUserName();
 
   void setIncoming(bool isIncoming);
   bool isIncoming() const;
@@ -86,8 +86,8 @@ protected:
   // Saved password is crypted.
   StringStorage m_defaultPassword;
 
-  // Blitsme username: Added JH 28 March 2013
-  StringStorage m_bmUserName;
+  // Gwupe username: Added JH 28 March 2013
+  StringStorage m_gwupeUserName;
 };
 
 
